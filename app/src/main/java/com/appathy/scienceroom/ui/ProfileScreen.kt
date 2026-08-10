@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.appathy.scienceroom.Game
+import com.appathy.scienceroom.engine.CivilizationEngine
 import com.appathy.scienceroom.engine.HintEngine
 import com.appathy.scienceroom.engine.LearningEngine
 import com.appathy.scienceroom.engine.SkillEngine
@@ -74,6 +75,23 @@ fun ProfileScreen(game: Game, onClose: () -> Unit) {
                 LabeledRow("実験成功率", "${state.successRate()} %")
                 LabeledRow("クイズ正答率", "$accuracy %")
                 LabeledRow("科学的思考力", "$thinking")
+            }
+        }
+
+        item { SectionTitle("文明のルート") }
+        item {
+            PanelCard {
+                Text(CivilizationEngine.label(state), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(6.dp))
+                CivilizationEngine.scores(state).forEach { pair ->
+                    LabeledRow(pair.first, pair.second.toString() + " 技術")
+                }
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    "どの系統を先に伸ばすかで、解禁される素材と実験の順番が変わります",
+                    fontSize = 11.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
 

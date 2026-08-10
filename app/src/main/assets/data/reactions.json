@@ -254,5 +254,124 @@
   "danger": 4,
   "simulationOnly": false,
   "exp": 60
+ },
+ {
+  "id": "r_lye",
+  "name": "灰汁をとる",
+  "inputs": [
+   "ash",
+   "water"
+  ],
+  "minTemp": 20,
+  "maxTemp": 100,
+  "minDuration": 2,
+  "equipment": "pot",
+  "product": "lye",
+  "observation": "上澄みがぬるりとして、指ですべるようになった",
+  "explanation": "灰に含まれる炭酸カリウムが水に溶け出し、アルカリ性の液になる",
+  "principle": "溶解とアルカリ性",
+  "changeType": "物理変化",
+  "danger": 2,
+  "simulationOnly": false,
+  "exp": 20
+ },
+ {
+  "id": "r_plaster",
+  "name": "漆喰を練る",
+  "inputs": [
+   "slaked_lime",
+   "water"
+  ],
+  "minTemp": 5,
+  "maxTemp": 40,
+  "minDuration": 2,
+  "equipment": null,
+  "product": "plaster",
+  "observation": "白い練り土になり、塗ると数日で硬くなった",
+  "explanation": "水酸化カルシウムが空気中の二酸化炭素と結びついて炭酸カルシウムに戻る。焼く前の石灰石に戻っていく",
+  "principle": "炭酸化 Ca(OH)2 + CO2 → CaCO3 + H2O",
+  "changeType": "化学変化",
+  "danger": 2,
+  "simulationOnly": false,
+  "exp": 25
+ },
+ {
+  "id": "r_glaze",
+  "name": "灰釉をかけて焼く",
+  "inputs": [
+   "ash",
+   "quartz",
+   "clay"
+  ],
+  "minTemp": 1100,
+  "maxTemp": 1300,
+  "minDuration": 4,
+  "equipment": "kiln",
+  "product": "glaze",
+  "observation": "器の表面が艶を持ち、水をはじくようになった",
+  "explanation": "灰が融剤になり、石英が器の表面で薄いガラスの層になる",
+  "principle": "融剤による表面ガラス化",
+  "changeType": "化学変化",
+  "danger": 2,
+  "simulationOnly": false,
+  "exp": 35
+ },
+ {
+  "id": "r_glassware",
+  "name": "ガラスを吹く",
+  "inputs": [
+   "glass"
+  ],
+  "minTemp": 700,
+  "maxTemp": 1000,
+  "minDuration": 2,
+  "equipment": "kiln",
+  "product": "glassware",
+  "observation": "飴のように伸びたガラスが、息を入れると丸くふくらんだ",
+  "explanation": "ガラスは決まった融点を持たず、温度とともに少しずつ柔らかくなる。だから吹いて形を変えられる",
+  "principle": "非晶質の軟化",
+  "changeType": "物理変化",
+  "danger": 3,
+  "simulationOnly": false,
+  "exp": 35
+ },
+ {
+  "id": "r_steel",
+  "name": "鉄に炭素を入れる",
+  "inputs": [
+   "iron",
+   "charcoal"
+  ],
+  "minTemp": 900,
+  "maxTemp": 1200,
+  "minDuration": 4,
+  "equipment": "bellows_kiln",
+  "product": "steel",
+  "observation": "表面が硬くなり、叩いたときの音が高くなった",
+  "explanation": "炭の炭素が鉄の表面から内部へ染み込み、原子の並びがずれにくくなる",
+  "principle": "浸炭",
+  "changeType": "化学変化",
+  "danger": 4,
+  "simulationOnly": false,
+  "exp": 60
+ },
+ {
+  "id": "r_distill",
+  "name": "水を蒸留する",
+  "inputs": [
+   "water"
+  ],
+  "minTemp": 100,
+  "maxTemp": 130,
+  "minDuration": 3,
+  "equipment": "pot",
+  "product": "distilled_water",
+  "observation": "湯気が冷えた面で水滴になり、澄んだ水が別の器にたまった",
+  "explanation": "水だけが気体になって移動し、溶けていたものは元の器に残る。分けただけなので物理変化",
+  "principle": "蒸留（沸点の差による分離）",
+  "changeType": "物理変化",
+  "danger": 2,
+  "simulationOnly": false,
+  "exp": 30
  }
 ]

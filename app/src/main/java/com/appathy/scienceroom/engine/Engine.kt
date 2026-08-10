@@ -452,6 +452,137 @@ object LearningEngine {
             .take(limit)
 }
 
+enum class PlanStyle(val id: String, val label: String) {
+    SHORTEST("shortest", "最短"),
+    LEARNING("learning", "学習重視"),
+    EXPLORE("explore", "探索重視"),
+    EXPERIMENT("experiment", "実験重視")
+}
+
+data class PlanStep(val kind: String, val label: String, val detail: String, val route: String)
+
+object PlanEngine {
+
+    /** 目標に必要な未完成の技術を依存順に並べる（仕様書22節の逆算） */
+    fun chain(content: Content, state: PlayerState, goalId: String): List<Technology> {
+        val out = LinkedHashSet<String>()
+
+        fun visit(id: String, seen: Set<String>) {
+            if (seen.contains(id) || out.contains(id)) return
+            val tech = content.techById[id] ?: return
+            tech.requiredTech.forEach { visit(it, seen + id) }
+            if (!state.completedTech.contains(id)) out.add(id)
+        }
+
+        visit(goalId, emptySet())
+        return out.mapNotNull { content.techById[it] }
+    }
+
+    fun plan(
+        content: Content,
+        state: PlayerState,
+        goalId: String,
+        style: PlanStyle
+    ): List<PlanStep> {
+        val steps = LinkedHashMap<String, PlanStep>()
+
+        chain(content, state, goalId).forEach { tech ->
+            val st = TechnologyEngine.status(content, state, tech)
+
+            st.missingElements.forEach { id ->
+                steps["e:" + id] = PlanStep(
+                    "学習",
+                    content.elementName(id) + "を覚える",
+                    "「" + tech.name + "」に必要な知識",
+                    "quiz"
+                )
+            }
+
+            st.missingMaterials.forEach { id ->
+                val where = content.locations.firstOrNull {
+                    it.materials.contains(id) && state.unlockedLocations.contains(it.id)
+                }
+                val maker = content.reactions.firstOrNull { it.product == id }
+                if (where != null) {
+                    steps["m:" + id] = PlanStep(
+                        "探索",
+                        where.name + "で" + content.materialName(id) + "を集める",
+                        "「" + tech.name + "」の材料",
+                        "world"
+                    )
+                } else if (maker != null) {
+                    steps["m:" + id] = PlanStep(
+                        "実験",
+                        content.materialName(id) + "を「" + maker.name + "」でつくる",
+                        "「" + tech.name + "」の材料",
+                        "lab"
+                    )
+                } else {
+                    steps["m:" + id] = PlanStep(
+                        "探索",
+                        content.materialName(id) + "を手に入れる",
+                        "入手できる地域がまだ解禁されていない",
+                        "world"
+                    )
+                }
+            }
+
+            st.missingReactions.forEach { id ->
+                val r = content.reactionById[id]
+                steps["r:" + id] = PlanStep(
+                    "実験",
+                    "「" + (r?.name ?: id) + "」を実験で確かめる",
+                    if (r == null) "" else r.minTemp.toString() + "〜" + r.maxTemp +
+                        "℃／器具は" + Equipment.label(r.equipment),
+                    "lab"
+                )
+            }
+
+            steps["t:" + tech.id] = PlanStep(
+                "研究",
+                tech.name + "を完成させる",
+                "難易度 " + tech.difficulty,
+                "tech"
+            )
+        }
+
+        val list = steps.values.toList()
+        val priority: (PlanStep) -> Int = { step ->
+            when (style) {
+                PlanStyle.SHORTEST -> 0
+                PlanStyle.LEARNING -> if (step.kind == "学習") 0 else 1
+                PlanStyle.EXPLORE -> if (step.kind == "探索") 0 else 1
+                PlanStyle.EXPERIMENT -> if (step.kind == "実験") 0 else 1
+            }
+        }
+        return list.sortedBy(priority)
+    }
+}
+
+object CivilizationEngine {
+
+    private val branches: List<Pair<String, List<String>>> = listOf(
+        "窯業" to listOf("kiln", "pottery", "lime", "plaster", "masonry", "glaze", "porcelain"),
+        "金属" to listOf("crucible", "bellows", "bronze", "iron", "casting", "forging", "steel"),
+        "ガラス・光学" to listOf("glass", "glassware", "lens", "microscope", "telescope"),
+        "化学" to listOf("fire", "charcoal", "salt", "lye", "distillation")
+    )
+
+    fun scores(state: PlayerState): List<Pair<String, Int>> =
+        branches.map { pair ->
+            pair.first to pair.second.count { state.completedTech.contains(it) }
+        }
+
+    fun label(state: PlayerState): String {
+        val s = scores(state)
+        val top = s.maxByOrNull { it.second }
+        if (top == null || top.second == 0) return "まだ方向が定まっていない"
+        val tied = s.filter { it.second == top.second }
+        if (tied.size > 1) return tied.joinToString("と") { it.first } + "を並行して進める文明"
+        return top.first + "に強い文明"
+    }
+}
+
 data class Suggestion(val title: String, val reason: String, val route: String)
 
 object RecommendEngine {

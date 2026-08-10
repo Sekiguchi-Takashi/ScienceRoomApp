@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.appathy.scienceroom.Game
 import com.appathy.scienceroom.engine.MissionEngine
+import com.appathy.scienceroom.engine.PlanEngine
+import com.appathy.scienceroom.engine.PlanStyle
 import com.appathy.scienceroom.engine.RecommendEngine
 
 @Composable
@@ -33,6 +35,10 @@ fun HomeScreen(game: Game, onNavigate: (String) -> Unit) {
     val research = RecommendEngine.currentResearch(content, state)
     val suggestions = RecommendEngine.top(content, state, now)
     val missions = MissionEngine.today(state)
+    val goalId = state.currentGoal
+    val goalTech = goalId?.let { content.techById[it] }
+    val goalSteps = if (goalId == null) emptyList()
+    else PlanEngine.plan(content, state, goalId, PlanStyle.SHORTEST).take(3)
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -62,6 +68,26 @@ fun HomeScreen(game: Game, onNavigate: (String) -> Unit) {
                 LabeledRow("覚えた元素", "${state.knownElements.size} / ${content.elements.size}")
                 LabeledRow("見つけた素材", "${state.discoveredMaterials.size} / ${content.materials.size}")
                 LabeledRow("完成した技術", "${state.completedTech.size} / ${content.technologies.size}")
+            }
+        }
+
+        if (goalTech != null) {
+            item { SectionTitle("目標：" + goalTech.name) }
+            item {
+                PanelCard {
+                    if (goalSteps.isEmpty()) {
+                        Text("条件がそろいました。技術タブで完成させましょう", fontSize = 14.sp)
+                    } else {
+                        goalSteps.forEachIndexed { i, step ->
+                            Text(
+                                (i + 1).toString() + ". [" + step.kind + "] " + step.label,
+                                fontSize = 14.sp,
+                                modifier = Modifier.padding(vertical = 2.dp)
+                            )
+                        }
+                    }
+                    TextButton(onClick = { onNavigate("tech") }) { Text("計画をすべて見る") }
+                }
             }
         }
 

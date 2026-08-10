@@ -1,5 +1,6 @@
 package com.appathy.scienceroom.ui
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +16,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -27,9 +30,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.appathy.scienceroom.Game
+import com.appathy.scienceroom.engine.PlanEngine
+import com.appathy.scienceroom.engine.PlanStyle
 import com.appathy.scienceroom.engine.RoadmapEngine
 import com.appathy.scienceroom.engine.TechnologyEngine
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TechScreen(game: Game, onNavigate: (String) -> Unit) {
     val content = game.content
@@ -39,6 +45,8 @@ fun TechScreen(game: Game, onNavigate: (String) -> Unit) {
     val grouped = statuses.groupBy { tierMap[it.tech.id] ?: 0 }
     val tierKeys = grouped.keys.sorted()
     var completedName by remember { mutableStateOf<String?>(null) }
+    var planFor by remember { mutableStateOf<String?>(null) }
+    var planStyle by remember { mutableStateOf(PlanStyle.SHORTEST) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -126,12 +134,13 @@ fun TechScreen(game: Game, onNavigate: (String) -> Unit) {
                             },
                             enabled = st.ready
                         ) { Text("研究する") }
+                        TextButton(onClick = { planFor = st.tech.id }) { Text("研究計画") }
                         if (st.missingElements.isNotEmpty()) {
                             TextButton(onClick = { onNavigate("quiz") }) { Text("元素を覚える") }
                         } else if (st.missingMaterials.isNotEmpty()) {
-                            TextButton(onClick = { onNavigate("world") }) { Text("探索する") }
+                            TextButton(onClick = { onNavigate("world") }) { Text("探索") }
                         } else if (st.missingReactions.isNotEmpty()) {
-                            TextButton(onClick = { onNavigate("lab") }) { Text("実験する") }
+                            TextButton(onClick = { onNavigate("lab") }) { Text("実験") }
                         }
                     }
                 } else {
@@ -152,6 +161,64 @@ fun TechScreen(game: Game, onNavigate: (String) -> Unit) {
         }
 
         item { Spacer(Modifier.height(20.dp)) }
+    }
+
+    val goalId = planFor
+    if (goalId != null) {
+        val goal = content.techById[goalId]
+        val steps = PlanEngine.plan(content, state, goalId, planStyle)
+        AlertDialog(
+            onDismissRequest = { planFor = null },
+            title = { Text("研究計画：" + (goal?.name ?: "")) },
+            text = {
+                Column {
+                    Text(
+                        "目標から必要な知識・素材・実験・技術を逆算しました。並べ方を選べます",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        PlanStyle.entries.forEach { ps ->
+                            FilterChip(
+                                selected = planStyle == ps,
+                                onClick = { planStyle = ps },
+                                label = { Text(ps.label, fontSize = 10.sp) }
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(10.dp))
+                    if (steps.isEmpty()) {
+                        Text("すでに条件を満たしています", fontSize = 14.sp)
+                    } else {
+                        steps.forEachIndexed { i, step ->
+                            Text(
+                                (i + 1).toString() + ". [" + step.kind + "] " + step.label,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            if (step.detail.isNotEmpty()) {
+                                Text(
+                                    "　　" + step.detail,
+                                    fontSize = 11.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(bottom = 3.dp)
+                                )
+                            }
+                        }
+                        Spacer(Modifier.height(6.dp))
+                        Text("全 " + steps.size + " 手", fontSize = 12.sp)
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    game.update { it.copy(currentGoal = goalId) }
+                    planFor = null
+                }) { Text("これを目標にする") }
+            },
+            dismissButton = { TextButton(onClick = { planFor = null }) { Text("閉じる") } }
+        )
     }
 
     val name = completedName

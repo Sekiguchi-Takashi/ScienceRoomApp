@@ -487,5 +487,116 @@
   "natural": false,
   "note": "溶けただけなので物理変化。冷ましても塩は消えない",
   "kind": "混合物"
+ },
+ {
+  "id": "lye",
+  "name": "灰汁",
+  "imageId": "mat_ash",
+  "composition": "K2CO3 aq",
+  "elements": [
+   "k",
+   "c",
+   "o",
+   "h"
+  ],
+  "locations": [],
+  "collection": "灰を水に浸して上澄みを取る",
+  "processing": "煮つめて濃くする",
+  "rarity": 2,
+  "natural": false,
+  "kind": "混合物",
+  "note": "弱いアルカリ性。あく抜きや洗浄に使う"
+ },
+ {
+  "id": "plaster",
+  "name": "漆喰",
+  "imageId": "tech_lime",
+  "composition": "Ca(OH)2 + 砂",
+  "elements": [
+   "ca",
+   "o",
+   "h",
+   "si"
+  ],
+  "locations": [],
+  "collection": "消石灰に水と砂を練り合わせる",
+  "processing": "塗って乾かす",
+  "rarity": 2,
+  "natural": false,
+  "kind": "混合物",
+  "note": "空気中の二酸化炭素を吸って石灰石に戻りながら固まる"
+ },
+ {
+  "id": "glaze",
+  "name": "釉薬",
+  "imageId": "tech_pottery",
+  "composition": "灰 + SiO2 + 粘土",
+  "elements": [
+   "k",
+   "ca",
+   "si",
+   "o",
+   "al"
+  ],
+  "locations": [],
+  "collection": "灰と石英と粘土を水で溶く",
+  "processing": "器に掛けて焼く",
+  "rarity": 3,
+  "natural": false,
+  "kind": "混合物",
+  "note": "焼くと器の表面でガラスになり、水を通さなくなる"
+ },
+ {
+  "id": "glassware",
+  "name": "ガラス器",
+  "imageId": "eq_flask",
+  "composition": "SiO2 系",
+  "elements": [
+   "si",
+   "o",
+   "na",
+   "ca"
+  ],
+  "locations": [],
+  "collection": "融けたガラスを吹いて成形する",
+  "processing": "徐冷してひずみを取る",
+  "rarity": 3,
+  "natural": false,
+  "kind": "混合物",
+  "note": "中身が見える器。観察と蒸留の道具になる"
+ },
+ {
+  "id": "steel",
+  "name": "鋼",
+  "imageId": "elem_fe",
+  "composition": "Fe + C",
+  "elements": [
+   "fe",
+   "c"
+  ],
+  "locations": [],
+  "collection": "鉄を炭とともに長く加熱して炭素を入れる",
+  "processing": "鍛えて焼き入れする",
+  "rarity": 5,
+  "natural": false,
+  "kind": "混合物",
+  "note": "炭素の量で硬さが変わる。鉄より鋭く、折れにくい"
+ },
+ {
+  "id": "distilled_water",
+  "name": "蒸留水",
+  "imageId": "mat_water",
+  "composition": "H2O",
+  "elements": [
+   "h",
+   "o"
+  ],
+  "locations": [],
+  "collection": "水を沸かして湯気を冷やして集める",
+  "processing": "密閉して保つ",
+  "rarity": 2,
+  "natural": false,
+  "kind": "化合物",
+  "note": "溶けていたものが残るので純度が上がる。物理変化だけで得られる"
  }
 ]

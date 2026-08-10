@@ -1,14 +1,532 @@
 [
-  {"id":"fire","name":"火起こし","imageId":"tech_fire","description":"摩擦で種火をつくる。すべての科学技術の出発点","requiredTech":[],"requiredMaterials":["wood"],"requiredElements":[],"requiredReactions":[],"unlocksLocations":[],"unlocksMaterials":["ash"],"difficulty":1},
-  {"id":"charcoal","name":"炭焼き","imageId":"tech_charcoal","description":"木を土で覆い、空気を絞って蒸し焼きにする","requiredTech":["fire"],"requiredMaterials":["wood"],"requiredElements":["c"],"requiredReactions":["r_charcoal"],"unlocksLocations":[],"unlocksMaterials":["charcoal"],"difficulty":2},
-  {"id":"kiln","name":"炉","imageId":"tech_kiln","description":"粘土と石で囲い、熱を逃さず高温を保つ","requiredTech":["charcoal"],"requiredMaterials":["clay","charcoal"],"requiredElements":[],"requiredReactions":[],"unlocksLocations":["mountain"],"unlocksMaterials":[],"difficulty":2},
-  {"id":"pottery","name":"土器","imageId":"tech_pottery","description":"粘土を成形して焼き固め、水を運べる器をつくる","requiredTech":["kiln"],"requiredMaterials":["clay"],"requiredElements":["si"],"requiredReactions":["r_pottery"],"unlocksLocations":["sea"],"unlocksMaterials":["pottery_ware"],"difficulty":2},
-  {"id":"lime","name":"石灰","imageId":"tech_lime","description":"石灰石や貝殻を焼いて生石灰を得る","requiredTech":["kiln"],"requiredMaterials":["limestone"],"requiredElements":["ca"],"requiredReactions":["r_lime"],"unlocksLocations":[],"unlocksMaterials":["quicklime"],"difficulty":3},
-  {"id":"salt","name":"製塩","imageId":"tech_salt","description":"海水を日と火で濃縮し、塩の結晶を取り出す","requiredTech":["pottery"],"requiredMaterials":["seawater"],"requiredElements":["na","cl"],"requiredReactions":["r_salt"],"unlocksLocations":[],"unlocksMaterials":["salt"],"difficulty":3},
-  {"id":"bellows","name":"ふいご","imageId":"tech_bellows","description":"炉に風を送り、燃焼を強めて温度を引き上げる","requiredTech":["pottery"],"requiredMaterials":["wood"],"requiredElements":["o"],"requiredReactions":[],"unlocksLocations":[],"unlocksMaterials":[],"difficulty":3},
-  {"id":"crucible","name":"るつぼ","imageId":"tech_crucible","description":"高温に耐える器。金属を融かして扱えるようになる","requiredTech":["pottery","lime"],"requiredMaterials":["clay","quicklime"],"requiredElements":[],"requiredReactions":[],"unlocksLocations":[],"unlocksMaterials":[],"difficulty":3},
-  {"id":"glass","name":"ガラス","imageId":"tech_glass","description":"石英に灰と石灰を混ぜ、融点を下げて融かす","requiredTech":["kiln","lime"],"requiredMaterials":["quartz","ash","limestone"],"requiredElements":["si","o"],"requiredReactions":["r_glass"],"unlocksLocations":[],"unlocksMaterials":["glass"],"difficulty":4},
-  {"id":"bronze","name":"青銅","imageId":"tech_bronze","description":"銅とスズを融かし合わせ、硬い合金をつくる","requiredTech":["crucible"],"requiredMaterials":["malachite","cassiterite","charcoal"],"requiredElements":["cu","sn"],"requiredReactions":["r_copper","r_tin","r_bronze"],"unlocksLocations":["cave"],"unlocksMaterials":["copper","tin","bronze"],"difficulty":4},
-  {"id":"iron","name":"製鉄","imageId":"tech_iron","description":"送風した炉で鉄鉱石を炭で還元する","requiredTech":["bellows","bronze"],"requiredMaterials":["hematite","charcoal"],"requiredElements":["fe","c"],"requiredReactions":["r_iron"],"unlocksLocations":[],"unlocksMaterials":["iron"],"difficulty":5},
-  {"id":"lens","name":"レンズ","imageId":"tech_lens","description":"ガラスを磨いて光を一点に集める","requiredTech":["glass"],"requiredMaterials":["glass"],"requiredElements":["si"],"requiredReactions":[],"unlocksLocations":[],"unlocksMaterials":[],"difficulty":5}
+ {
+  "id": "fire",
+  "name": "火起こし",
+  "imageId": "tech_fire",
+  "description": "摩擦で種火をつくる。すべての科学技術の出発点",
+  "requiredTech": [],
+  "requiredMaterials": [
+   "wood"
+  ],
+  "requiredElements": [],
+  "requiredReactions": [],
+  "unlocksLocations": [],
+  "unlocksMaterials": [
+   "ash"
+  ],
+  "difficulty": 1
+ },
+ {
+  "id": "charcoal",
+  "name": "炭焼き",
+  "imageId": "tech_charcoal",
+  "description": "木を土で覆い、空気を絞って蒸し焼きにする",
+  "requiredTech": [
+   "fire"
+  ],
+  "requiredMaterials": [
+   "wood"
+  ],
+  "requiredElements": [
+   "c"
+  ],
+  "requiredReactions": [
+   "r_charcoal"
+  ],
+  "unlocksLocations": [],
+  "unlocksMaterials": [
+   "charcoal"
+  ],
+  "difficulty": 2
+ },
+ {
+  "id": "kiln",
+  "name": "炉",
+  "imageId": "tech_kiln",
+  "description": "粘土と石で囲い、熱を逃さず高温を保つ",
+  "requiredTech": [
+   "charcoal"
+  ],
+  "requiredMaterials": [
+   "clay",
+   "charcoal"
+  ],
+  "requiredElements": [],
+  "requiredReactions": [],
+  "unlocksLocations": [
+   "mountain"
+  ],
+  "unlocksMaterials": [],
+  "difficulty": 2
+ },
+ {
+  "id": "pottery",
+  "name": "土器",
+  "imageId": "tech_pottery",
+  "description": "粘土を成形して焼き固め、水を運べる器をつくる",
+  "requiredTech": [
+   "kiln"
+  ],
+  "requiredMaterials": [
+   "clay"
+  ],
+  "requiredElements": [
+   "si"
+  ],
+  "requiredReactions": [
+   "r_pottery"
+  ],
+  "unlocksLocations": [
+   "sea"
+  ],
+  "unlocksMaterials": [
+   "pottery_ware"
+  ],
+  "difficulty": 2
+ },
+ {
+  "id": "lime",
+  "name": "石灰",
+  "imageId": "tech_lime",
+  "description": "石灰石や貝殻を焼いて生石灰を得る",
+  "requiredTech": [
+   "kiln"
+  ],
+  "requiredMaterials": [
+   "limestone"
+  ],
+  "requiredElements": [
+   "ca"
+  ],
+  "requiredReactions": [
+   "r_lime"
+  ],
+  "unlocksLocations": [],
+  "unlocksMaterials": [
+   "quicklime"
+  ],
+  "difficulty": 3
+ },
+ {
+  "id": "salt",
+  "name": "製塩",
+  "imageId": "tech_salt",
+  "description": "海水を日と火で濃縮し、塩の結晶を取り出す",
+  "requiredTech": [
+   "pottery"
+  ],
+  "requiredMaterials": [
+   "seawater"
+  ],
+  "requiredElements": [
+   "na",
+   "cl"
+  ],
+  "requiredReactions": [
+   "r_salt"
+  ],
+  "unlocksLocations": [],
+  "unlocksMaterials": [
+   "salt"
+  ],
+  "difficulty": 3
+ },
+ {
+  "id": "bellows",
+  "name": "ふいご",
+  "imageId": "tech_bellows",
+  "description": "炉に風を送り、燃焼を強めて温度を引き上げる",
+  "requiredTech": [
+   "pottery"
+  ],
+  "requiredMaterials": [
+   "wood"
+  ],
+  "requiredElements": [
+   "o"
+  ],
+  "requiredReactions": [],
+  "unlocksLocations": [],
+  "unlocksMaterials": [],
+  "difficulty": 3
+ },
+ {
+  "id": "crucible",
+  "name": "るつぼ",
+  "imageId": "tech_crucible",
+  "description": "高温に耐える器。金属を融かして扱えるようになる",
+  "requiredTech": [
+   "pottery",
+   "lime"
+  ],
+  "requiredMaterials": [
+   "clay",
+   "quicklime"
+  ],
+  "requiredElements": [],
+  "requiredReactions": [],
+  "unlocksLocations": [],
+  "unlocksMaterials": [],
+  "difficulty": 3
+ },
+ {
+  "id": "glass",
+  "name": "ガラス",
+  "imageId": "tech_glass",
+  "description": "石英に灰と石灰を混ぜ、融点を下げて融かす",
+  "requiredTech": [
+   "kiln",
+   "lime"
+  ],
+  "requiredMaterials": [
+   "quartz",
+   "ash",
+   "limestone"
+  ],
+  "requiredElements": [
+   "si",
+   "o"
+  ],
+  "requiredReactions": [
+   "r_glass"
+  ],
+  "unlocksLocations": [],
+  "unlocksMaterials": [
+   "glass"
+  ],
+  "difficulty": 4
+ },
+ {
+  "id": "bronze",
+  "name": "青銅",
+  "imageId": "tech_bronze",
+  "description": "銅とスズを融かし合わせ、硬い合金をつくる",
+  "requiredTech": [
+   "crucible"
+  ],
+  "requiredMaterials": [
+   "malachite",
+   "cassiterite",
+   "charcoal"
+  ],
+  "requiredElements": [
+   "cu",
+   "sn"
+  ],
+  "requiredReactions": [
+   "r_copper",
+   "r_tin",
+   "r_bronze"
+  ],
+  "unlocksLocations": [
+   "cave"
+  ],
+  "unlocksMaterials": [
+   "copper",
+   "tin",
+   "bronze"
+  ],
+  "difficulty": 4
+ },
+ {
+  "id": "iron",
+  "name": "製鉄",
+  "imageId": "tech_iron",
+  "description": "送風した炉で鉄鉱石を炭で還元する",
+  "requiredTech": [
+   "bellows",
+   "bronze"
+  ],
+  "requiredMaterials": [
+   "hematite",
+   "charcoal"
+  ],
+  "requiredElements": [
+   "fe",
+   "c"
+  ],
+  "requiredReactions": [
+   "r_iron"
+  ],
+  "unlocksLocations": [],
+  "unlocksMaterials": [
+   "iron"
+  ],
+  "difficulty": 5
+ },
+ {
+  "id": "lens",
+  "name": "レンズ",
+  "imageId": "tech_lens",
+  "description": "ガラスを磨いて光を一点に集める",
+  "requiredTech": [
+   "glass"
+  ],
+  "requiredMaterials": [
+   "glass"
+  ],
+  "requiredElements": [
+   "si"
+  ],
+  "requiredReactions": [],
+  "unlocksLocations": [],
+  "unlocksMaterials": [],
+  "difficulty": 5
+ },
+ {
+  "id": "lye",
+  "name": "灰汁",
+  "imageId": "mat_ash",
+  "description": "灰を水に浸してアルカリ性の液を取り出す",
+  "requiredTech": [
+   "pottery"
+  ],
+  "requiredMaterials": [
+   "ash",
+   "water"
+  ],
+  "requiredElements": [
+   "k"
+  ],
+  "requiredReactions": [
+   "r_lye"
+  ],
+  "unlocksLocations": [],
+  "unlocksMaterials": [
+   "lye"
+  ],
+  "difficulty": 2
+ },
+ {
+  "id": "plaster",
+  "name": "漆喰",
+  "imageId": "tech_lime",
+  "description": "消石灰を水で練り、乾かして固める",
+  "requiredTech": [
+   "lime"
+  ],
+  "requiredMaterials": [
+   "slaked_lime",
+   "water"
+  ],
+  "requiredElements": [
+   "ca"
+  ],
+  "requiredReactions": [
+   "r_plaster"
+  ],
+  "unlocksLocations": [],
+  "unlocksMaterials": [
+   "plaster"
+  ],
+  "difficulty": 3
+ },
+ {
+  "id": "masonry",
+  "name": "石積み建築",
+  "imageId": "tech_kiln",
+  "description": "石を漆喰でつなぎ、崩れない壁を築く",
+  "requiredTech": [
+   "plaster"
+  ],
+  "requiredMaterials": [
+   "plaster",
+   "limestone"
+  ],
+  "requiredElements": [],
+  "requiredReactions": [],
+  "unlocksLocations": [],
+  "unlocksMaterials": [],
+  "difficulty": 3
+ },
+ {
+  "id": "glaze",
+  "name": "釉薬",
+  "imageId": "tech_pottery",
+  "description": "灰と石英で器の表面をガラスの膜で覆う",
+  "requiredTech": [
+   "pottery",
+   "glass"
+  ],
+  "requiredMaterials": [
+   "ash",
+   "quartz"
+  ],
+  "requiredElements": [
+   "si"
+  ],
+  "requiredReactions": [
+   "r_glaze"
+  ],
+  "unlocksLocations": [],
+  "unlocksMaterials": [
+   "glaze"
+  ],
+  "difficulty": 4
+ },
+ {
+  "id": "porcelain",
+  "name": "磁器",
+  "imageId": "tech_pottery",
+  "description": "より高い温度で焼き締め、薄く硬い器をつくる",
+  "requiredTech": [
+   "glaze"
+  ],
+  "requiredMaterials": [
+   "clay",
+   "glaze"
+  ],
+  "requiredElements": [
+   "al"
+  ],
+  "requiredReactions": [],
+  "unlocksLocations": [],
+  "unlocksMaterials": [],
+  "difficulty": 4
+ },
+ {
+  "id": "glassware",
+  "name": "ガラス器",
+  "imageId": "eq_flask",
+  "description": "融けたガラスを吹いて中の見える器をつくる",
+  "requiredTech": [
+   "glass"
+  ],
+  "requiredMaterials": [
+   "glass"
+  ],
+  "requiredElements": [],
+  "requiredReactions": [
+   "r_glassware"
+  ],
+  "unlocksLocations": [],
+  "unlocksMaterials": [
+   "glassware"
+  ],
+  "difficulty": 4
+ },
+ {
+  "id": "casting",
+  "name": "鋳造",
+  "imageId": "tech_crucible",
+  "description": "融けた金属を型に流し、複雑な形をつくる",
+  "requiredTech": [
+   "bronze"
+  ],
+  "requiredMaterials": [
+   "bronze",
+   "clay"
+  ],
+  "requiredElements": [],
+  "requiredReactions": [],
+  "unlocksLocations": [],
+  "unlocksMaterials": [],
+  "difficulty": 4
+ },
+ {
+  "id": "forging",
+  "name": "鍛冶",
+  "imageId": "tech_iron",
+  "description": "熱した鉄を叩いて不純物を出し、形を整える",
+  "requiredTech": [
+   "iron"
+  ],
+  "requiredMaterials": [
+   "iron",
+   "charcoal"
+  ],
+  "requiredElements": [
+   "fe"
+  ],
+  "requiredReactions": [],
+  "unlocksLocations": [],
+  "unlocksMaterials": [],
+  "difficulty": 5
+ },
+ {
+  "id": "steel",
+  "name": "鋼",
+  "imageId": "elem_fe",
+  "description": "鉄に炭素を染み込ませ、硬くて折れにくくする",
+  "requiredTech": [
+   "forging"
+  ],
+  "requiredMaterials": [
+   "iron",
+   "charcoal"
+  ],
+  "requiredElements": [
+   "c"
+  ],
+  "requiredReactions": [
+   "r_steel"
+  ],
+  "unlocksLocations": [],
+  "unlocksMaterials": [
+   "steel"
+  ],
+  "difficulty": 5
+ },
+ {
+  "id": "distillation",
+  "name": "蒸留",
+  "imageId": "eq_burner",
+  "description": "沸点の違いを使って混ざったものを分ける",
+  "requiredTech": [
+   "glassware"
+  ],
+  "requiredMaterials": [
+   "water",
+   "glassware"
+  ],
+  "requiredElements": [
+   "h",
+   "o"
+  ],
+  "requiredReactions": [
+   "r_distill"
+  ],
+  "unlocksLocations": [],
+  "unlocksMaterials": [
+   "distilled_water"
+  ],
+  "difficulty": 4
+ },
+ {
+  "id": "microscope",
+  "name": "顕微鏡",
+  "imageId": "tech_lens",
+  "description": "レンズを重ね、目に見えない小ささを見る",
+  "requiredTech": [
+   "lens",
+   "glassware"
+  ],
+  "requiredMaterials": [
+   "glass"
+  ],
+  "requiredElements": [],
+  "requiredReactions": [],
+  "unlocksLocations": [],
+  "unlocksMaterials": [],
+  "difficulty": 5
+ },
+ {
+  "id": "telescope",
+  "name": "望遠鏡",
+  "imageId": "tech_lens",
+  "description": "レンズと金属の筒で遠くを引き寄せる",
+  "requiredTech": [
+   "lens",
+   "casting"
+  ],
+  "requiredMaterials": [
+   "glass",
+   "bronze"
+  ],
+  "requiredElements": [],
+  "requiredReactions": [],
+  "unlocksLocations": [],
+  "unlocksMaterials": [],
+  "difficulty": 5
+ }
 ]
