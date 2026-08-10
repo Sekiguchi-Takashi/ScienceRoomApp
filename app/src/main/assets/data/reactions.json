@@ -1,0 +1,258 @@
+[
+ {
+  "id": "r_charcoal",
+  "name": "炭焼き",
+  "inputs": [
+   "wood"
+  ],
+  "minTemp": 400,
+  "maxTemp": 700,
+  "minDuration": 3,
+  "equipment": null,
+  "product": "charcoal",
+  "observation": "白い煙がやがて青い煙に変わり、木が黒く軽くなった",
+  "explanation": "空気を絞って加熱すると、木は燃え尽きずに水分と揮発分だけを失う。あとに炭素が残る。土をかぶせた伏せ焼きでもできるので、炉がなくても始められる",
+  "principle": "乾留（熱分解）",
+  "changeType": "化学変化",
+  "danger": 2,
+  "simulationOnly": false,
+  "exp": 20
+ },
+ {
+  "id": "r_pottery",
+  "name": "土器を焼く",
+  "inputs": [
+   "clay"
+  ],
+  "minTemp": 700,
+  "maxTemp": 1000,
+  "minDuration": 3,
+  "equipment": "kiln",
+  "product": "pottery_ware",
+  "observation": "赤茶色に変わり、叩くと硬い音がするようになった",
+  "explanation": "粘土の粒が高温で部分的に融けて結びつき、水を通さない硬い体になる",
+  "principle": "焼結",
+  "changeType": "化学変化",
+  "danger": 1,
+  "simulationOnly": false,
+  "exp": 20
+ },
+ {
+  "id": "r_lime",
+  "name": "石灰石を焼く",
+  "inputs": [
+   "limestone"
+  ],
+  "minTemp": 800,
+  "maxTemp": 1100,
+  "minDuration": 4,
+  "equipment": "kiln",
+  "product": "quicklime",
+  "observation": "石が白くもろくなり、重さが軽くなった",
+  "explanation": "炭酸カルシウムが分解して二酸化炭素が抜け、酸化カルシウムが残る",
+  "principle": "熱分解 CaCO3 → CaO + CO2",
+  "changeType": "化学変化",
+  "danger": 2,
+  "simulationOnly": false,
+  "exp": 25
+ },
+ {
+  "id": "r_lime_shell",
+  "name": "貝殻を焼く",
+  "inputs": [
+   "shell"
+  ],
+  "minTemp": 800,
+  "maxTemp": 1100,
+  "minDuration": 4,
+  "equipment": "kiln",
+  "product": "quicklime",
+  "observation": "貝殻が白く崩れ、指で粉にできるようになった",
+  "explanation": "貝殻も石灰石と同じ炭酸カルシウム。同じ温度で同じ変化が起こる",
+  "principle": "熱分解 CaCO3 → CaO + CO2",
+  "changeType": "化学変化",
+  "danger": 2,
+  "simulationOnly": false,
+  "exp": 25
+ },
+ {
+  "id": "r_slaked",
+  "name": "生石灰に水を加える",
+  "inputs": [
+   "quicklime",
+   "water"
+  ],
+  "minTemp": 0,
+  "maxTemp": 80,
+  "minDuration": 1,
+  "equipment": null,
+  "product": "slaked_lime",
+  "observation": "激しく湯気を上げ、器が熱くなった",
+  "explanation": "酸化カルシウムが水と結びついて水酸化カルシウムになる。このとき熱を放出する",
+  "principle": "発熱反応 CaO + H2O → Ca(OH)2",
+  "changeType": "化学変化",
+  "danger": 3,
+  "simulationOnly": false,
+  "exp": 25
+ },
+ {
+  "id": "r_salt",
+  "name": "海水を煮つめる",
+  "inputs": [
+   "seawater"
+  ],
+  "minTemp": 60,
+  "maxTemp": 120,
+  "minDuration": 4,
+  "equipment": "pot",
+  "product": "salt",
+  "observation": "水が減っていき、底に白い結晶が現れた",
+  "explanation": "水だけが蒸発して出ていき、溶けていた塩が残って結晶になる",
+  "principle": "蒸発による濃縮と析出",
+  "changeType": "物理変化",
+  "danger": 1,
+  "simulationOnly": false,
+  "exp": 20
+ },
+ {
+  "id": "r_brine",
+  "name": "岩塩を水に溶かす",
+  "inputs": [
+   "rock_salt",
+   "water"
+  ],
+  "minTemp": 0,
+  "maxTemp": 100,
+  "minDuration": 1,
+  "equipment": null,
+  "product": "brine",
+  "observation": "塩が見えなくなり、透明なままの水になった",
+  "explanation": "塩は水の中で細かく散らばっただけで、別のものに変わってはいない。煮つめれば元の塩が戻る",
+  "principle": "溶解（物理変化）",
+  "changeType": "物理変化",
+  "danger": 1,
+  "simulationOnly": false,
+  "exp": 10
+ },
+ {
+  "id": "r_glass",
+  "name": "ガラスを融かす",
+  "inputs": [
+   "quartz",
+   "ash",
+   "limestone"
+  ],
+  "minTemp": 1200,
+  "maxTemp": 1500,
+  "minDuration": 4,
+  "equipment": "kiln",
+  "product": "glass",
+  "observation": "砂がどろりとした赤い液になり、冷えると透きとおった塊になった",
+  "explanation": "石英だけでは1700℃を超えないと融けない。灰と石灰を加えると融点が下がり、炉の温度でも融ける",
+  "principle": "融剤による融点降下",
+  "changeType": "化学変化",
+  "danger": 3,
+  "simulationOnly": false,
+  "exp": 40
+ },
+ {
+  "id": "r_copper",
+  "name": "銅の製錬",
+  "inputs": [
+   "malachite",
+   "charcoal"
+  ],
+  "minTemp": 1000,
+  "maxTemp": 1300,
+  "minDuration": 4,
+  "equipment": "crucible",
+  "product": "copper",
+  "observation": "緑の石が黒くなり、やがて赤く光る金属の粒が底にたまった",
+  "explanation": "炭が酸素を奪い、鉱石の中の銅が金属として取り出される",
+  "principle": "炭素による還元",
+  "changeType": "化学変化",
+  "danger": 3,
+  "simulationOnly": false,
+  "exp": 40
+ },
+ {
+  "id": "r_tin",
+  "name": "スズの製錬",
+  "inputs": [
+   "cassiterite",
+   "charcoal"
+  ],
+  "minTemp": 1000,
+  "maxTemp": 1300,
+  "minDuration": 3,
+  "equipment": "crucible",
+  "product": "tin",
+  "observation": "黒い石から銀白色の重い液がしみ出した",
+  "explanation": "錫石の酸素を炭が奪い、融点の低いスズが液体になって分かれる",
+  "principle": "炭素による還元",
+  "changeType": "化学変化",
+  "danger": 3,
+  "simulationOnly": false,
+  "exp": 40
+ },
+ {
+  "id": "r_bronze",
+  "name": "青銅を鋳る",
+  "inputs": [
+   "copper",
+   "tin"
+  ],
+  "minTemp": 900,
+  "maxTemp": 1200,
+  "minDuration": 3,
+  "equipment": "crucible",
+  "product": "bronze",
+  "observation": "二つの金属が溶け合い、冷えると銅より硬く黄色みを帯びた塊になった",
+  "explanation": "銅にスズを一割ほど混ぜると、原子の並びがずれにくくなって硬くなる。融点も下がって鋳やすい",
+  "principle": "合金化",
+  "changeType": "化学変化",
+  "danger": 3,
+  "simulationOnly": false,
+  "exp": 50
+ },
+ {
+  "id": "r_iron",
+  "name": "鉄鉱石を還元する",
+  "inputs": [
+   "hematite",
+   "charcoal"
+  ],
+  "minTemp": 1200,
+  "maxTemp": 1500,
+  "minDuration": 5,
+  "equipment": "bellows_kiln",
+  "product": "iron",
+  "observation": "炉の底に、灰と混じった海綿のような鉄の塊が残った",
+  "explanation": "炭が鉄鉱石から酸素を奪う。銅より高い温度と強い送風が要るため、ふいごが欠かせない",
+  "principle": "炭素による還元 Fe2O3 + 3C → 2Fe + 3CO",
+  "changeType": "化学変化",
+  "danger": 4,
+  "simulationOnly": false,
+  "exp": 60
+ },
+ {
+  "id": "r_tatara",
+  "name": "砂鉄から鉄をつくる",
+  "inputs": [
+   "iron_sand",
+   "charcoal"
+  ],
+  "minTemp": 1200,
+  "maxTemp": 1500,
+  "minDuration": 5,
+  "equipment": "bellows_kiln",
+  "product": "iron",
+  "observation": "砂鉄が炭の層の間で固まり、鉄の塊になった",
+  "explanation": "砂鉄も鉄の酸化物。粒が細かいぶん炭とよく触れ、同じ還元が進む",
+  "principle": "炭素による還元",
+  "changeType": "化学変化",
+  "danger": 4,
+  "simulationOnly": false,
+  "exp": 60
+ }
+]

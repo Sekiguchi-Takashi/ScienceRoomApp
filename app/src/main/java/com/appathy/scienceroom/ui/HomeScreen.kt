@@ -1,0 +1,135 @@
+package com.appathy.scienceroom.ui
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.item
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.appathy.scienceroom.Game
+import com.appathy.scienceroom.engine.MissionEngine
+import com.appathy.scienceroom.engine.RecommendEngine
+
+@Composable
+fun HomeScreen(game: Game, onNavigate: (String) -> Unit) {
+    val state = game.state
+    val content = game.content
+    val now = System.currentTimeMillis()
+    val research = RecommendEngine.currentResearch(content, state)
+    val suggestions = RecommendEngine.top(content, state, now)
+    val missions = MissionEngine.today(state)
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(14.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("科学室", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                TextButton(onClick = { onNavigate("profile") }) { Text("👤 自分") }
+            }
+        }
+
+        item {
+            PanelCard {
+                Text("科学レベル ${state.level}", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(6.dp))
+                LinearProgressIndicator(
+                    progress = { state.expInLevel / 100f },
+                    modifier = Modifier.fillMaxWidth().height(8.dp)
+                )
+                Spacer(Modifier.height(8.dp))
+                LabeledRow("覚えた元素", "${state.knownElements.size} / ${content.elements.size}")
+                LabeledRow("見つけた素材", "${state.discoveredMaterials.size} / ${content.materials.size}")
+                LabeledRow("完成した技術", "${state.completedTech.size} / ${content.technologies.size}")
+            }
+        }
+
+        item { SectionTitle("現在の研究") }
+        item {
+            PanelCard {
+                if (research == null) {
+                    Text("研究できる技術がありません。素材を集めましょう", fontSize = 14.sp)
+                } else {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Thumb(research.tech.imageId, 40)
+                        Spacer(Modifier.width(10.dp))
+                        Column {
+                            Text(research.tech.name, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                            Text(research.tech.description, fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    if (research.missingMaterials.isNotEmpty()) {
+                        LabeledRow("必要素材", research.missingMaterials.joinToString("、") {
+                            content.materialName(it)
+                        })
+                    }
+                    if (research.missingElements.isNotEmpty()) {
+                        LabeledRow("必要知識", research.missingElements.joinToString("、") {
+                            content.elementName(it)
+                        })
+                    }
+                    if (research.missingReactions.isNotEmpty()) {
+                        LabeledRow("必要な反応", research.missingReactions.joinToString("、") {
+                            content.reactionById[it]?.name ?: it
+                        })
+                    }
+                    if (research.ready) Text("条件がそろっています", fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.primary)
+                    Spacer(Modifier.height(4.dp))
+                    TextButton(onClick = { onNavigate("tech") }) { Text("技術ツリーを見る") }
+                }
+            }
+        }
+
+        item { SectionTitle("おすすめの行動") }
+        for (i in suggestions.indices) {
+            item {
+                val s = suggestions[i]
+                PanelCard(modifier = Modifier.clickable { onNavigate(s.route) }) {
+                    Text("${i + 1}. ${s.title}", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                    Text(s.reason, fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        }
+
+        item { SectionTitle("今日のミッション") }
+        item {
+            PanelCard {
+                missions.forEach { m ->
+                    Text(
+                        (if (m.done) "☑ " else "☐ ") + m.text,
+                        fontSize = 14.sp,
+                        modifier = Modifier.padding(vertical = 2.dp)
+                    )
+                }
+            }
+        }
+
+        item { Spacer(Modifier.height(20.dp)) }
+    }
+}

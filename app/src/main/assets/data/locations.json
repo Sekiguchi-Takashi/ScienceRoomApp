@@ -1,0 +1,86 @@
+[
+ {
+  "id": "forest",
+  "name": "森",
+  "imageId": "loc_forest",
+  "environment": "温帯の広葉樹林",
+  "materials": [
+   "wood",
+   "water",
+   "clay",
+   "ash"
+  ],
+  "difficulty": 1,
+  "danger": 1,
+  "unlockedBy": null,
+  "description": "倒木と落ち葉の積もる林。燃料と水が手に入る"
+ },
+ {
+  "id": "river",
+  "name": "川",
+  "imageId": "loc_river",
+  "environment": "山あいの清流",
+  "materials": [
+   "water",
+   "clay",
+   "quartz",
+   "iron_sand",
+   "cassiterite",
+   "gold_dust"
+  ],
+  "difficulty": 2,
+  "danger": 1,
+  "unlockedBy": null,
+  "description": "石の河原。重い粒が下に沈むので、選り分けると珍しい砂が採れる"
+ },
+ {
+  "id": "mountain",
+  "name": "山",
+  "imageId": "loc_mountain",
+  "environment": "森林限界より上の岩場",
+  "materials": [
+   "quartz",
+   "limestone",
+   "hematite",
+   "malachite",
+   "cassiterite"
+  ],
+  "difficulty": 3,
+  "danger": 2,
+  "unlockedBy": "kiln",
+  "description": "露出した地層。鉱石を直接割り取れる"
+ },
+ {
+  "id": "sea",
+  "name": "海岸",
+  "imageId": "loc_sea",
+  "environment": "干潮の岩礁",
+  "materials": [
+   "seawater",
+   "shell",
+   "iron_sand",
+   "quartz"
+  ],
+  "difficulty": 2,
+  "danger": 2,
+  "unlockedBy": "pottery",
+  "description": "潮だまりと打ち上げられた貝。海水を汲むには器がいる"
+ },
+ {
+  "id": "cave",
+  "name": "洞窟",
+  "imageId": "loc_cave",
+  "environment": "石灰岩の鍾乳洞",
+  "materials": [
+   "limestone",
+   "malachite",
+   "rock_salt",
+   "sulfur",
+   "hematite"
+  ],
+  "difficulty": 4,
+  "danger": 3,
+  "unlockedBy": "bronze",
+  "description": "地下水が刻んだ空洞。鉱脈と塩の層が眠る"
+ }
+]
