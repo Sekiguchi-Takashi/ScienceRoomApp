@@ -1,5 +1,7 @@
 package com.appathy.scienceroom
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
