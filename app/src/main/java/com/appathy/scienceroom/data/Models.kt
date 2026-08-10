@@ -34,6 +34,7 @@ data class GameMaterial(
     val processing: String,
     val rarity: Int,
     val natural: Boolean,
+    val kind: String = "化合物",
     val note: String
 )
 
@@ -148,6 +149,8 @@ data class PlayerState(
     val quizCount: Int = 0,
     val quizCorrect: Int = 0,
     val hintLevel: Int = 2,
+    val autoHint: Boolean = true,
+    val researchLeads: Set<String> = emptySet(),
     val lastFailureIds: List<String> = emptyList()
 ) {
     val level: Int get() = 1 + exp / 100
@@ -183,5 +186,6 @@ data class ExperimentResult(
     val hint: String,
     val gainedExp: Int,
     val newKnowledge: List<String>,
-    val warning: String?
+    val warning: String?,
+    val leadReactionId: String? = null
 )

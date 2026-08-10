@@ -46,7 +46,8 @@ fun EncyclopediaScreen(game: Game, onNavigate: (String) -> Unit) {
         TabRow(selectedTabIndex = tab) {
             Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text("元素") })
             Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text("素材") })
-            Tab(selected = tab == 2, onClick = { tab = 2 }, text = { Text("反応") })
+            Tab(selected = tab == 2, onClick = { tab = 2 }, text = { Text("化合物") })
+            Tab(selected = tab == 3, onClick = { tab = 3 }, text = { Text("反応") })
         }
 
         LazyColumn(
@@ -118,6 +119,52 @@ fun EncyclopediaScreen(game: Game, onNavigate: (String) -> Unit) {
                                         fontSize = 12.sp,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                2 -> {
+                    item {
+                        Text(
+                            "物質は単体・化合物・混合物に分けられます。見つけた素材だけ並びます",
+                            fontSize = 13.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    for (kind in listOf("単体", "化合物", "混合物")) {
+                        item { SectionTitle(kind) }
+                        val list = content.materials.filter {
+                            it.kind == kind && state.discoveredMaterials.contains(it.id)
+                        }
+                        if (list.isEmpty()) {
+                            item {
+                                PanelCard {
+                                    Text("まだ見つけていません", fontSize = 13.sp)
+                                }
+                            }
+                        } else {
+                            items(list) { m ->
+                                PanelCard(modifier = Modifier.clickable { material = m }) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Thumb(m.imageId, 40)
+                                        Spacer(Modifier.width(12.dp))
+                                        Column {
+                                            Text(
+                                                "${m.name}　${m.composition}",
+                                                fontSize = 15.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                            Text(
+                                                m.elements.joinToString("・") {
+                                                    content.elementById[it]?.symbol ?: it
+                                                },
+                                                fontSize = 12.sp,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -204,6 +251,8 @@ fun EncyclopediaScreen(game: Game, onNavigate: (String) -> Unit) {
                     Thumb(m.imageId, 96)
                     Spacer(Modifier.height(8.dp))
                     LabeledRow("組成", m.composition)
+                    LabeledRow("区分", m.kind)
+                    LabeledRow("状態", if (m.natural) "自然界から採取" else "加工して得る")
                     LabeledRow("希少度", dangerStars(m.rarity))
                     LabeledRow("所持数", (state.inventory[m.id] ?: 0).toString())
                     Spacer(Modifier.height(6.dp))
@@ -216,6 +265,16 @@ fun EncyclopediaScreen(game: Game, onNavigate: (String) -> Unit) {
                         "関連元素：" + m.elements.joinToString("、") { game.content.elementName(it) },
                         fontSize = 13.sp
                     )
+                    val uses = content.reactions.filter { it.inputs.contains(m.id) }
+                    if (uses.isNotEmpty()) {
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            "この素材を使う実験：" + uses.joinToString("、") {
+                                if (state.discoveredReactions.contains(it.id)) it.name else "???"
+                            },
+                            fontSize = 13.sp
+                        )
+                    }
                 }
             },
             confirmButton = { TextButton(onClick = { material = null }) { Text("閉じる") } }

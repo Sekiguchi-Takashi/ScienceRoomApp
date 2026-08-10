@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.appathy.scienceroom.Game
+import com.appathy.scienceroom.engine.RoadmapEngine
 import com.appathy.scienceroom.engine.TechnologyEngine
 
 @Composable
@@ -34,6 +35,9 @@ fun TechScreen(game: Game, onNavigate: (String) -> Unit) {
     val content = game.content
     val state = game.state
     val statuses = TechnologyEngine.all(content, state)
+    val tierMap = RoadmapEngine.tiers(content)
+    val grouped = statuses.groupBy { tierMap[it.tech.id] ?: 0 }
+    val tierKeys = grouped.keys.sorted()
     var completedName by remember { mutableStateOf<String?>(null) }
 
     LazyColumn(
@@ -44,12 +48,20 @@ fun TechScreen(game: Game, onNavigate: (String) -> Unit) {
         item {
             Text("科学技術ロードマップ", fontSize = 22.sp, fontWeight = FontWeight.Bold)
             Text(
-                "条件を満たした技術から順に解禁されます",
+                "技術は一本道ではなく分岐します。段が進むほど前提が増えます",
                 fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
-        items(statuses) { st ->
+        for (tier in tierKeys) {
+        item {
+            SectionTitle(
+                "第${tier + 1}段　" +
+                    (grouped[tier] ?: emptyList()).count { it.completed }.toString() +
+                    " / " + (grouped[tier] ?: emptyList()).size
+            )
+        }
+        items(grouped[tier] ?: emptyList()) { st ->
             PanelCard {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Thumb(st.tech.imageId, 48)
@@ -125,7 +137,18 @@ fun TechScreen(game: Game, onNavigate: (String) -> Unit) {
                 } else {
                     LabeledRow("難易度", dangerStars(st.tech.difficulty))
                 }
+
+                val children = RoadmapEngine.children(content, st.tech.id)
+                if (children.isNotEmpty()) {
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        "└→ " + children.joinToString("、") { it.name },
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
+                }
             }
+        }
         }
 
         item { Spacer(Modifier.height(20.dp)) }

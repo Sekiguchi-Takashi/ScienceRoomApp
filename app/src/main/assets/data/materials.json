@@ -1,28 +1,491 @@
 [
-  {"id":"wood","name":"木","imageId":"mat_wood","composition":"セルロース","elements":["c","h","o"],"locations":["forest"],"collection":"倒木や枝を拾い集める","processing":"割って乾かす","rarity":1,"natural":true,"note":"最初の燃料。炭にもなる"},
-  {"id":"charcoal","name":"木炭","imageId":"mat_charcoal","composition":"C","elements":["c"],"locations":[],"collection":"木を蒸し焼きにしてつくる","processing":"砕いて使う","rarity":2,"natural":false,"note":"木より高い温度が出せる燃料であり、金属を取り出す還元剤でもある"},
-  {"id":"clay","name":"粘土","imageId":"mat_clay","composition":"含水ケイ酸アルミニウム","elements":["si","al","o","h"],"locations":["river"],"collection":"川岸の地層から掘る","processing":"水でこねて不純物を除く","rarity":1,"natural":true,"note":"焼くと固まり、器や炉の壁になる"},
-  {"id":"limestone","name":"石灰石","imageId":"mat_limestone","composition":"CaCO3","elements":["ca","c","o"],"locations":["mountain","cave"],"collection":"露頭から割り取る","processing":"砕く","rarity":1,"natural":true,"note":"焼くと生石灰になる。ガラスや製鉄の材料"},
-  {"id":"quartz","name":"石英","imageId":"mat_quartz","composition":"SiO2","elements":["si","o"],"locations":["mountain","river"],"collection":"岩の割れ目から採る","processing":"砕いて砂にする","rarity":2,"natural":true,"note":"ガラスとレンズの原料"},
-  {"id":"iron_sand","name":"砂鉄","imageId":"mat_iron_sand","composition":"Fe3O4","elements":["fe","o"],"locations":["river","sea"],"collection":"磁石で砂から選り分ける","processing":"水で洗って選鉱する","rarity":2,"natural":true,"note":"たたら製鉄の原料"},
-  {"id":"hematite","name":"赤鉄鉱","imageId":"mat_hematite","composition":"Fe2O3","elements":["fe","o"],"locations":["mountain","cave"],"collection":"鉱脈から掘り出す","processing":"砕いて焼く","rarity":3,"natural":true,"note":"鉄の主要な鉱石"},
-  {"id":"malachite","name":"孔雀石","imageId":"mat_malachite","composition":"Cu2CO3(OH)2","elements":["cu","c","o","h"],"locations":["cave","mountain"],"collection":"緑色の縞を目印に掘る","processing":"砕いて選別する","rarity":3,"natural":true,"note":"銅の鉱石。最初に人が金属を得た石のひとつ"},
-  {"id":"cassiterite","name":"錫石","imageId":"mat_cassiterite","composition":"SnO2","elements":["sn","o"],"locations":["river","mountain"],"collection":"川床の重い砂から選る","processing":"比重で選鉱する","rarity":4,"natural":true,"note":"スズの鉱石。青銅に欠かせない"},
-  {"id":"sulfur","name":"硫黄","imageId":"mat_sulfur","composition":"S","elements":["s"],"locations":["cave"],"collection":"噴気孔のまわりから採る","processing":"融かして不純物を分ける","rarity":3,"natural":true,"note":"扱いに注意が必要。ゲーム内シミュレーション限定の実験がある"},
-  {"id":"rock_salt","name":"岩塩","imageId":"mat_rock_salt","composition":"NaCl","elements":["na","cl"],"locations":["cave"],"collection":"塩の層を割り取る","processing":"水に溶かして再結晶させる","rarity":3,"natural":true,"note":"内陸で塩を得る手段"},
-  {"id":"seawater","name":"海水","imageId":"mat_seawater","composition":"H2O + NaCl ほか","elements":["h","o","na","cl","mg"],"locations":["sea"],"collection":"器で汲む","processing":"日干しで濃くする","rarity":1,"natural":true,"note":"煮つめると塩が残る"},
-  {"id":"shell","name":"貝殻","imageId":"mat_shell","composition":"CaCO3","elements":["ca","c","o"],"locations":["sea"],"collection":"浜で拾う","processing":"洗って砕く","rarity":1,"natural":true,"note":"石灰石と同じ成分。焼けば石灰になる"},
-  {"id":"ash","name":"草木灰","imageId":"mat_ash","composition":"K2CO3 ほか","elements":["k","ca","c","o"],"locations":[],"collection":"焚き火の跡から集める","processing":"ふるって粒を除く","rarity":1,"natural":false,"note":"ガラスの融剤、肥料、灰汁の原料"},
-  {"id":"water","name":"水","imageId":"mat_water","composition":"H2O","elements":["h","o"],"locations":["river","forest"],"collection":"器で汲む","processing":"沈めて濾す","rarity":1,"natural":true,"note":"あらゆる実験の基本"},
-  {"id":"gold_dust","name":"砂金","imageId":"mat_gold_dust","composition":"Au","elements":["au"],"locations":["river"],"collection":"椀で砂を揺すって選る","processing":"集めて溶かす","rarity":5,"natural":true,"note":"重さの違いを利用して選り分ける"},
-  {"id":"quicklime","name":"生石灰","imageId":"mat_limestone","composition":"CaO","elements":["ca","o"],"locations":[],"collection":"石灰石や貝殻を焼いて得る","processing":"密閉して保管する","rarity":2,"natural":false,"note":"水と反応して熱を出す"},
-  {"id":"slaked_lime","name":"消石灰","imageId":"mat_ash","composition":"Ca(OH)2","elements":["ca","o","h"],"locations":[],"collection":"生石灰に水を加えて得る","processing":"乾かして粉にする","rarity":2,"natural":false,"note":"漆喰やモルタルの材料"},
-  {"id":"pottery_ware","name":"土器","imageId":"tech_pottery","composition":"焼成粘土","elements":["si","al","o"],"locations":[],"collection":"粘土を成形して焼く","processing":"研いで仕上げる","rarity":2,"natural":false,"note":"水や海水を運び、煮つめるための器"},
-  {"id":"glass","name":"ガラス","imageId":"tech_glass","composition":"SiO2 + Na2O + CaO","elements":["si","o","na","ca"],"locations":[],"collection":"石英と灰と石灰を高温で融かす","processing":"吹いて成形する","rarity":3,"natural":false,"note":"レンズにつながる素材"},
-  {"id":"copper","name":"銅","imageId":"elem_cu","composition":"Cu","elements":["cu"],"locations":[],"collection":"孔雀石を炭と一緒に加熱して得る","processing":"鋳造・鍛造する","rarity":3,"natural":false,"note":"人が最初に広く使った金属"},
-  {"id":"tin","name":"スズ","imageId":"elem_sn","composition":"Sn","elements":["sn"],"locations":[],"collection":"錫石を炭と一緒に加熱して得る","processing":"鋳造する","rarity":4,"natural":false,"note":"銅に加えると硬い青銅になる"},
-  {"id":"bronze","name":"青銅","imageId":"tech_bronze","composition":"Cu + Sn","elements":["cu","sn"],"locations":[],"collection":"銅とスズを融かして混ぜる","processing":"型に流して鋳る","rarity":4,"natural":false,"note":"石より鋭く長持ちする道具になる"},
-  {"id":"iron","name":"鉄","imageId":"elem_fe","composition":"Fe","elements":["fe"],"locations":[],"collection":"鉄鉱石や砂鉄を炭と高温で還元して得る","processing":"鍛えて不純物を出す","rarity":4,"natural":false,"note":"高い温度と送風が要る。文明を大きく進める"},
-  {"id":"salt","name":"塩","imageId":"mat_rock_salt","composition":"NaCl","elements":["na","cl"],"locations":[],"collection":"海水を濃縮して結晶を得る","processing":"乾かす","rarity":1,"natural":false,"note":"保存食と交易の基礎"},
-  {"id":"brine","name":"食塩水","imageId":"mat_seawater","composition":"NaCl aq","elements":["na","cl","h","o"],"locations":[],"collection":"岩塩や塩を水に溶かす","processing":"煮つめる","rarity":1,"natural":false,"note":"溶けただけなので物理変化。冷ましても塩は消えない"}
+ {
+  "id": "wood",
+  "name": "木",
+  "imageId": "mat_wood",
+  "composition": "セルロース",
+  "elements": [
+   "c",
+   "h",
+   "o"
+  ],
+  "locations": [
+   "forest"
+  ],
+  "collection": "倒木や枝を拾い集める",
+  "processing": "割って乾かす",
+  "rarity": 1,
+  "natural": true,
+  "note": "最初の燃料。炭にもなる",
+  "kind": "混合物"
+ },
+ {
+  "id": "charcoal",
+  "name": "木炭",
+  "imageId": "mat_charcoal",
+  "composition": "C",
+  "elements": [
+   "c"
+  ],
+  "locations": [],
+  "collection": "木を蒸し焼きにしてつくる",
+  "processing": "砕いて使う",
+  "rarity": 2,
+  "natural": false,
+  "note": "木より高い温度が出せる燃料であり、金属を取り出す還元剤でもある",
+  "kind": "単体"
+ },
+ {
+  "id": "clay",
+  "name": "粘土",
+  "imageId": "mat_clay",
+  "composition": "含水ケイ酸アルミニウム",
+  "elements": [
+   "si",
+   "al",
+   "o",
+   "h"
+  ],
+  "locations": [
+   "river"
+  ],
+  "collection": "川岸の地層から掘る",
+  "processing": "水でこねて不純物を除く",
+  "rarity": 1,
+  "natural": true,
+  "note": "焼くと固まり、器や炉の壁になる",
+  "kind": "混合物"
+ },
+ {
+  "id": "limestone",
+  "name": "石灰石",
+  "imageId": "mat_limestone",
+  "composition": "CaCO3",
+  "elements": [
+   "ca",
+   "c",
+   "o"
+  ],
+  "locations": [
+   "mountain",
+   "cave"
+  ],
+  "collection": "露頭から割り取る",
+  "processing": "砕く",
+  "rarity": 1,
+  "natural": true,
+  "note": "焼くと生石灰になる。ガラスや製鉄の材料",
+  "kind": "化合物"
+ },
+ {
+  "id": "quartz",
+  "name": "石英",
+  "imageId": "mat_quartz",
+  "composition": "SiO2",
+  "elements": [
+   "si",
+   "o"
+  ],
+  "locations": [
+   "mountain",
+   "river"
+  ],
+  "collection": "岩の割れ目から採る",
+  "processing": "砕いて砂にする",
+  "rarity": 2,
+  "natural": true,
+  "note": "ガラスとレンズの原料",
+  "kind": "化合物"
+ },
+ {
+  "id": "iron_sand",
+  "name": "砂鉄",
+  "imageId": "mat_iron_sand",
+  "composition": "Fe3O4",
+  "elements": [
+   "fe",
+   "o"
+  ],
+  "locations": [
+   "river",
+   "sea"
+  ],
+  "collection": "磁石で砂から選り分ける",
+  "processing": "水で洗って選鉱する",
+  "rarity": 2,
+  "natural": true,
+  "note": "たたら製鉄の原料",
+  "kind": "化合物"
+ },
+ {
+  "id": "hematite",
+  "name": "赤鉄鉱",
+  "imageId": "mat_hematite",
+  "composition": "Fe2O3",
+  "elements": [
+   "fe",
+   "o"
+  ],
+  "locations": [
+   "mountain",
+   "cave"
+  ],
+  "collection": "鉱脈から掘り出す",
+  "processing": "砕いて焼く",
+  "rarity": 3,
+  "natural": true,
+  "note": "鉄の主要な鉱石",
+  "kind": "化合物"
+ },
+ {
+  "id": "malachite",
+  "name": "孔雀石",
+  "imageId": "mat_malachite",
+  "composition": "Cu2CO3(OH)2",
+  "elements": [
+   "cu",
+   "c",
+   "o",
+   "h"
+  ],
+  "locations": [
+   "cave",
+   "mountain"
+  ],
+  "collection": "緑色の縞を目印に掘る",
+  "processing": "砕いて選別する",
+  "rarity": 3,
+  "natural": true,
+  "note": "銅の鉱石。最初に人が金属を得た石のひとつ",
+  "kind": "化合物"
+ },
+ {
+  "id": "cassiterite",
+  "name": "錫石",
+  "imageId": "mat_cassiterite",
+  "composition": "SnO2",
+  "elements": [
+   "sn",
+   "o"
+  ],
+  "locations": [
+   "river",
+   "mountain"
+  ],
+  "collection": "川床の重い砂から選る",
+  "processing": "比重で選鉱する",
+  "rarity": 4,
+  "natural": true,
+  "note": "スズの鉱石。青銅に欠かせない",
+  "kind": "化合物"
+ },
+ {
+  "id": "sulfur",
+  "name": "硫黄",
+  "imageId": "mat_sulfur",
+  "composition": "S",
+  "elements": [
+   "s"
+  ],
+  "locations": [
+   "cave"
+  ],
+  "collection": "噴気孔のまわりから採る",
+  "processing": "融かして不純物を分ける",
+  "rarity": 3,
+  "natural": true,
+  "note": "扱いに注意が必要。ゲーム内シミュレーション限定の実験がある",
+  "kind": "単体"
+ },
+ {
+  "id": "rock_salt",
+  "name": "岩塩",
+  "imageId": "mat_rock_salt",
+  "composition": "NaCl",
+  "elements": [
+   "na",
+   "cl"
+  ],
+  "locations": [
+   "cave"
+  ],
+  "collection": "塩の層を割り取る",
+  "processing": "水に溶かして再結晶させる",
+  "rarity": 3,
+  "natural": true,
+  "note": "内陸で塩を得る手段",
+  "kind": "化合物"
+ },
+ {
+  "id": "seawater",
+  "name": "海水",
+  "imageId": "mat_seawater",
+  "composition": "H2O + NaCl ほか",
+  "elements": [
+   "h",
+   "o",
+   "na",
+   "cl",
+   "mg"
+  ],
+  "locations": [
+   "sea"
+  ],
+  "collection": "器で汲む",
+  "processing": "日干しで濃くする",
+  "rarity": 1,
+  "natural": true,
+  "note": "煮つめると塩が残る",
+  "kind": "混合物"
+ },
+ {
+  "id": "shell",
+  "name": "貝殻",
+  "imageId": "mat_shell",
+  "composition": "CaCO3",
+  "elements": [
+   "ca",
+   "c",
+   "o"
+  ],
+  "locations": [
+   "sea"
+  ],
+  "collection": "浜で拾う",
+  "processing": "洗って砕く",
+  "rarity": 1,
+  "natural": true,
+  "note": "石灰石と同じ成分。焼けば石灰になる",
+  "kind": "化合物"
+ },
+ {
+  "id": "ash",
+  "name": "草木灰",
+  "imageId": "mat_ash",
+  "composition": "K2CO3 ほか",
+  "elements": [
+   "k",
+   "ca",
+   "c",
+   "o"
+  ],
+  "locations": [],
+  "collection": "焚き火の跡から集める",
+  "processing": "ふるって粒を除く",
+  "rarity": 1,
+  "natural": false,
+  "note": "ガラスの融剤、肥料、灰汁の原料",
+  "kind": "混合物"
+ },
+ {
+  "id": "water",
+  "name": "水",
+  "imageId": "mat_water",
+  "composition": "H2O",
+  "elements": [
+   "h",
+   "o"
+  ],
+  "locations": [
+   "river",
+   "forest"
+  ],
+  "collection": "器で汲む",
+  "processing": "沈めて濾す",
+  "rarity": 1,
+  "natural": true,
+  "note": "あらゆる実験の基本",
+  "kind": "化合物"
+ },
+ {
+  "id": "gold_dust",
+  "name": "砂金",
+  "imageId": "mat_gold_dust",
+  "composition": "Au",
+  "elements": [
+   "au"
+  ],
+  "locations": [
+   "river"
+  ],
+  "collection": "椀で砂を揺すって選る",
+  "processing": "集めて溶かす",
+  "rarity": 5,
+  "natural": true,
+  "note": "重さの違いを利用して選り分ける",
+  "kind": "単体"
+ },
+ {
+  "id": "quicklime",
+  "name": "生石灰",
+  "imageId": "mat_limestone",
+  "composition": "CaO",
+  "elements": [
+   "ca",
+   "o"
+  ],
+  "locations": [],
+  "collection": "石灰石や貝殻を焼いて得る",
+  "processing": "密閉して保管する",
+  "rarity": 2,
+  "natural": false,
+  "note": "水と反応して熱を出す",
+  "kind": "化合物"
+ },
+ {
+  "id": "slaked_lime",
+  "name": "消石灰",
+  "imageId": "mat_ash",
+  "composition": "Ca(OH)2",
+  "elements": [
+   "ca",
+   "o",
+   "h"
+  ],
+  "locations": [],
+  "collection": "生石灰に水を加えて得る",
+  "processing": "乾かして粉にする",
+  "rarity": 2,
+  "natural": false,
+  "note": "漆喰やモルタルの材料",
+  "kind": "化合物"
+ },
+ {
+  "id": "pottery_ware",
+  "name": "土器",
+  "imageId": "tech_pottery",
+  "composition": "焼成粘土",
+  "elements": [
+   "si",
+   "al",
+   "o"
+  ],
+  "locations": [],
+  "collection": "粘土を成形して焼く",
+  "processing": "研いで仕上げる",
+  "rarity": 2,
+  "natural": false,
+  "note": "水や海水を運び、煮つめるための器",
+  "kind": "混合物"
+ },
+ {
+  "id": "glass",
+  "name": "ガラス",
+  "imageId": "tech_glass",
+  "composition": "SiO2 + Na2O + CaO",
+  "elements": [
+   "si",
+   "o",
+   "na",
+   "ca"
+  ],
+  "locations": [],
+  "collection": "石英と灰と石灰を高温で融かす",
+  "processing": "吹いて成形する",
+  "rarity": 3,
+  "natural": false,
+  "note": "レンズにつながる素材",
+  "kind": "混合物"
+ },
+ {
+  "id": "copper",
+  "name": "銅",
+  "imageId": "elem_cu",
+  "composition": "Cu",
+  "elements": [
+   "cu"
+  ],
+  "locations": [],
+  "collection": "孔雀石を炭と一緒に加熱して得る",
+  "processing": "鋳造・鍛造する",
+  "rarity": 3,
+  "natural": false,
+  "note": "人が最初に広く使った金属",
+  "kind": "単体"
+ },
+ {
+  "id": "tin",
+  "name": "スズ",
+  "imageId": "elem_sn",
+  "composition": "Sn",
+  "elements": [
+   "sn"
+  ],
+  "locations": [],
+  "collection": "錫石を炭と一緒に加熱して得る",
+  "processing": "鋳造する",
+  "rarity": 4,
+  "natural": false,
+  "note": "銅に加えると硬い青銅になる",
+  "kind": "単体"
+ },
+ {
+  "id": "bronze",
+  "name": "青銅",
+  "imageId": "tech_bronze",
+  "composition": "Cu + Sn",
+  "elements": [
+   "cu",
+   "sn"
+  ],
+  "locations": [],
+  "collection": "銅とスズを融かして混ぜる",
+  "processing": "型に流して鋳る",
+  "rarity": 4,
+  "natural": false,
+  "note": "石より鋭く長持ちする道具になる",
+  "kind": "混合物"
+ },
+ {
+  "id": "iron",
+  "name": "鉄",
+  "imageId": "elem_fe",
+  "composition": "Fe",
+  "elements": [
+   "fe"
+  ],
+  "locations": [],
+  "collection": "鉄鉱石や砂鉄を炭と高温で還元して得る",
+  "processing": "鍛えて不純物を出す",
+  "rarity": 4,
+  "natural": false,
+  "note": "高い温度と送風が要る。文明を大きく進める",
+  "kind": "単体"
+ },
+ {
+  "id": "salt",
+  "name": "塩",
+  "imageId": "mat_rock_salt",
+  "composition": "NaCl",
+  "elements": [
+   "na",
+   "cl"
+  ],
+  "locations": [],
+  "collection": "海水を濃縮して結晶を得る",
+  "processing": "乾かす",
+  "rarity": 1,
+  "natural": false,
+  "note": "保存食と交易の基礎",
+  "kind": "化合物"
+ },
+ {
+  "id": "brine",
+  "name": "食塩水",
+  "imageId": "mat_seawater",
+  "composition": "NaCl aq",
+  "elements": [
+   "na",
+   "cl",
+   "h",
+   "o"
+  ],
+  "locations": [],
+  "collection": "岩塩や塩を水に溶かす",
+  "processing": "煮つめる",
+  "rarity": 1,
+  "natural": false,
+  "note": "溶けただけなので物理変化。冷ましても塩は消えない",
+  "kind": "混合物"
+ }
 ]

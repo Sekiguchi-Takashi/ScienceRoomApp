@@ -111,6 +111,40 @@ object ExplorationEngine {
     }
 }
 
+object HintEngine {
+    /** 成績に応じてヒントの詳しさを自動調整する。手動設定のときは設定値をそのまま使う */
+    fun effectiveLevel(state: PlayerState): Int {
+        if (!state.autoHint) return state.hintLevel.coerceIn(1, 5)
+        val exp = state.experimentCount
+        if (exp < 3) return 3
+        val success = state.successRate()
+        val quiz = if (state.quizCount == 0) 50 else state.quizCorrect * 100 / state.quizCount
+        val score = (success + quiz) / 2
+        return when {
+            score >= 75 -> 1
+            score >= 60 -> 2
+            score >= 40 -> 3
+            score >= 25 -> 4
+            else -> 5
+        }
+    }
+}
+
+object SerendipityEngine {
+    /** 定義された反応にならない組み合わせから、偶然に研究候補を見つけることがある */
+    fun lead(content: Content, state: PlayerState, selected: List<String>): Reaction? {
+        val candidates = content.reactions.filter { r ->
+            !state.discoveredReactions.contains(r.id) &&
+                r.inputs.any { selected.contains(it) }
+        }
+        if (candidates.isEmpty()) return null
+        val seed = (state.experimentCount * 131L + selected.sorted().joinToString().hashCode())
+        val rnd = Random(seed)
+        if (rnd.nextInt(100) >= 35) return null
+        return candidates[rnd.nextInt(candidates.size)]
+    }
+}
+
 object ExperimentEngine {
 
     fun run(content: Content, state: PlayerState, input: ExperimentInput): ExperimentResult {
@@ -124,13 +158,29 @@ object ExperimentEngine {
             )
         }
 
+        val level = HintEngine.effectiveLevel(state)
+
         val exact = content.reactions.firstOrNull { it.inputs.sorted() == selected }
         if (exact == null) {
+            val lead = SerendipityEngine.lead(content, state, selected)
+            if (lead != null && !state.researchLeads.contains(lead.id)) {
+                return ExperimentResult(
+                    Rank.C, null, null, "予想外の結果",
+                    "狙った変化は起きなかったが、器の底にわずかな手がかりが残った",
+                    "偶然の組み合わせから、まだ確かめていない反応の気配が見つかった。" +
+                        "科学の発見はこうした寄り道から生まれることがある",
+                    "—",
+                    emptyList(),
+                    "研究候補「${lead.name}」が開いた。必要な素材は" +
+                        lead.inputs.joinToString("、") { content.materialName(it) } + "だ",
+                    6, listOf("新しい研究候補「${lead.name}」を書き留めた"), null, lead.id
+                )
+            }
             val near = content.reactions.filter { r -> r.inputs.any { selected.contains(it) } }
             val hint = when {
                 near.isEmpty() -> "この組み合わせに手がかりはなさそうだ。図鑑で素材の関連を見てみよう"
-                state.hintLevel <= 1 -> "組み合わせを見直してみよう"
-                state.hintLevel == 2 -> "素材の数か種類が合っていないかもしれない"
+                level <= 1 -> "組み合わせを見直してみよう"
+                level == 2 -> "素材の数か種類が合っていないかもしれない"
                 else -> "「${content.materialName(near.first().inputs.first())}」を含む組み合わせに何かありそうだ"
             }
             return ExperimentResult(
@@ -185,7 +235,7 @@ object ExperimentEngine {
         }
 
         val rank = if (causes.size == 1) Rank.B else Rank.D
-        val hint = buildHint(state.hintLevel, causes, exact, input, content)
+        val hint = buildHint(level, causes, exact, input, content)
         val title = if (rank == Rank.B) "部分成功" else "実験失敗"
         val observation = if (rank == Rank.B)
             "変化のきざしはあったが、途中で止まってしまった"
@@ -252,6 +302,8 @@ object ExperimentEngine {
                 lastFailureIds = (listOf(result.reaction?.id ?: "unknown") + s.lastFailureIds).take(5)
             )
         }
+        val lead = result.leadReactionId
+        if (lead != null) s = s.copy(researchLeads = s.researchLeads + lead)
         return s
     }
 }
@@ -467,6 +519,63 @@ object RecommendEngine {
 
     fun currentResearch(content: Content, state: PlayerState): TechStatus? =
         TechnologyEngine.all(content, state).firstOrNull { !it.completed && it.unlocked }
+}
+
+data class Skill(val name: String, val value: Int, val note: String)
+
+object SkillEngine {
+    /** 仕様書28節の科学的思考力。すべて0〜100 */
+    fun compute(content: Content, state: PlayerState): List<Skill> {
+        fun pct(a: Int, b: Int): Int = if (b == 0) 0 else (a * 100 / b).coerceIn(0, 100)
+
+        val knowledge = pct(state.knownElements.size, content.elements.size)
+        val observation = pct(state.discoveredMaterials.size, content.materials.size)
+        val hypothesis = pct(state.discoveredReactions.size, content.reactions.size)
+        val design = state.successRate()
+        val interpretation =
+            if (state.quizCount == 0) 0 else state.quizCorrect * 100 / state.quizCount
+        val causal =
+            if (state.failCount == 0) 0
+            else pct(state.successCount, state.successCount + state.failCount)
+        val application = pct(state.completedTech.size, content.technologies.size)
+
+        return listOf(
+            Skill("知識量", knowledge, "覚えた元素の割合"),
+            Skill("観察力", observation, "見つけた素材の割合"),
+            Skill("仮説形成", hypothesis, "記録した反応の割合"),
+            Skill("実験設計", design, "実験の成功率"),
+            Skill("結果解釈", interpretation, "クイズの正答率"),
+            Skill("原因分析", causal, "失敗を経て成功に至った割合"),
+            Skill("応用力", application, "完成させた技術の割合")
+        )
+    }
+
+    fun total(skills: List<Skill>): Int =
+        if (skills.isEmpty()) 0 else skills.sumOf { it.value } / skills.size
+}
+
+object RoadmapEngine {
+    /** 前提技術の深さから段（tier）を求める。分岐したツリーを段ごとに並べるために使う */
+    fun tiers(content: Content): Map<String, Int> {
+        val result = mutableMapOf<String, Int>()
+
+        fun depth(id: String, seen: Set<String>): Int {
+            result[id]?.let { return it }
+            if (seen.contains(id)) return 0
+            val tech = content.techById[id] ?: return 0
+            val d = if (tech.requiredTech.isEmpty()) 0
+            else (tech.requiredTech.maxOfOrNull { depth(it, seen + id) } ?: -1) + 1
+            result[id] = d
+            return d
+        }
+
+        content.technologies.forEach { depth(it.id, emptySet()) }
+        return result
+    }
+
+    /** この技術から派生する技術 */
+    fun children(content: Content, id: String): List<Technology> =
+        content.technologies.filter { it.requiredTech.contains(id) }
 }
 
 data class Mission(val text: String, val done: Boolean)

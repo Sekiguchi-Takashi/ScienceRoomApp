@@ -33,9 +33,19 @@ GitHub Actions（`.github/workflows/build.yml`）で `gradle assembleDebug`。
 Actions の artifact から debug APK をダウンロードする。Gradle Wrapper は同梱せず、
 `gradle/actions/setup-gradle` が Gradle 8.9 を用意する。
 
-## 次にやること（MVP-2）
-- 素材の加工段階（未発見→発見→採取→加工→精製）の明示
-- セレンディピティ（未定義の組み合わせから新研究候補を出す）
-- 科学的思考力の項目別評価
+## MVP-2 で入れたもの（v2.0）
+- `SerendipityEngine` … 定義外の組み合わせから確率 35%（シードは実験回数＋素材の並び）で研究候補を開放。
+  `PlayerState.researchLeads` に記録し、実験室とプロフィールに一覧表示
+- `HintEngine` … 実験成功率とクイズ正答率からヒント Lv を自動調整。手動固定も可（`autoHint`）
+- `SkillEngine` … 仕様書28節の科学的思考力7項目（知識量/観察力/仮説形成/実験設計/結果解釈/原因分析/応用力）
+- `RoadmapEngine` … 前提技術の深さから段を算出し、技術画面を段ごとの分岐表示に変更。
+  各ノードに派生先（`└→`）を表示
+- 図鑑に「化合物」タブ … 素材を単体 / 化合物 / 混合物に分類（`materials.json` の `kind`）。
+  素材詳細に区分・採取か加工か・その素材を使う実験を追加
+
+## 次にやること（MVP-3）
+- 大規模な技術ツリーと多地域探索
 - AI 科学助手のオンライン連携（現状はルールベースのローカル推薦のみ）
+- クラウド同期とイベント
 - `tech_salt` / `tech_lens` の画像差し替え（絵柄が他と揃っていない）
+- `elem_au` の刻印「FINE GOLD」がイメージクイズの答えを示してしまう

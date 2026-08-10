@@ -1,5 +1,9 @@
 package com.appathy.scienceroom.ui
 
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +29,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.appathy.scienceroom.Game
+import com.appathy.scienceroom.engine.HintEngine
 import com.appathy.scienceroom.engine.LearningEngine
+import com.appathy.scienceroom.engine.SkillEngine
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,7 +45,8 @@ fun ProfileScreen(game: Game, onClose: () -> Unit) {
     val discovery = state.discoveredMaterials.size * 100 / content.materials.size
     val invention = state.completedTech.size * 100 / content.technologies.size
     val accuracy = if (state.quizCount == 0) 0 else state.quizCorrect * 100 / state.quizCount
-    val thinking = (knowledge + discovery + invention + state.successRate()) / 4
+    val skills = SkillEngine.compute(content, state)
+    val thinking = SkillEngine.total(skills)
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -67,6 +74,59 @@ fun ProfileScreen(game: Game, onClose: () -> Unit) {
                 LabeledRow("実験成功率", "${state.successRate()} %")
                 LabeledRow("クイズ正答率", "$accuracy %")
                 LabeledRow("科学的思考力", "$thinking")
+            }
+        }
+
+        item { SectionTitle("科学的思考力") }
+        item {
+            PanelCard {
+                skills.forEach { sk ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(sk.name, fontSize = 13.sp, modifier = Modifier.width(72.dp))
+                        LinearProgressIndicator(
+                            progress = { sk.value / 100f },
+                            modifier = Modifier.weight(1f).height(8.dp)
+                        )
+                        Text(
+                            "${sk.value}",
+                            fontSize = 12.sp,
+                            modifier = Modifier.width(34.dp),
+                            textAlign = TextAlign.End
+                        )
+                    }
+                    Text(
+                        sk.note, fontSize = 10.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 72.dp, bottom = 4.dp)
+                    )
+                }
+            }
+        }
+
+        item { SectionTitle("研究候補") }
+        item {
+            PanelCard {
+                if (state.researchLeads.isEmpty()) {
+                    Text(
+                        "まだありません。決められた組み合わせ以外も試すと、思わぬ発見があります",
+                        fontSize = 13.sp
+                    )
+                } else {
+                    state.researchLeads.forEach { id ->
+                        val r = content.reactionById[id]
+                        if (r != null) {
+                            Text(
+                                "・${r.name}（" +
+                                    r.inputs.joinToString("＋") { content.materialName(it) } + "）",
+                                fontSize = 13.sp,
+                                modifier = Modifier.padding(vertical = 2.dp)
+                            )
+                        }
+                    }
+                }
             }
         }
 
@@ -104,14 +164,28 @@ fun ProfileScreen(game: Game, onClose: () -> Unit) {
                 )
                 Spacer(Modifier.height(8.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    FilterChip(
+                        selected = state.autoHint,
+                        onClick = { game.update { s -> s.copy(autoHint = !s.autoHint) } },
+                        label = { Text("自動", fontSize = 11.sp) }
+                    )
                     (1..5).forEach { lv ->
                         FilterChip(
-                            selected = state.hintLevel == lv,
-                            onClick = { game.update { s -> s.copy(hintLevel = lv) } },
+                            selected = !state.autoHint && state.hintLevel == lv,
+                            onClick = {
+                                game.update { s -> s.copy(hintLevel = lv, autoHint = false) }
+                            },
                             label = { Text("Lv$lv", fontSize = 11.sp) }
                         )
                     }
                 }
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    "いまのヒント Lv${HintEngine.effectiveLevel(state)}" +
+                        if (state.autoHint) "（成績に合わせて自動調整中）" else "",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         }
 

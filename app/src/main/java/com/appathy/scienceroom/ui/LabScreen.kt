@@ -167,6 +167,31 @@ private fun ExperimentPane(game: Game) {
             ) { Text("実験開始") }
         }
 
+        item { SectionTitle("研究候補（偶然の発見）") }
+        item {
+            PanelCard {
+                val leads = state.researchLeads.filter { !state.discoveredReactions.contains(it) }
+                if (leads.isEmpty()) {
+                    Text(
+                        "決められた組み合わせ以外も試してみましょう。思わぬ手がかりが出ることがあります",
+                        fontSize = 13.sp
+                    )
+                } else {
+                    leads.forEach { id ->
+                        val r = content.reactionById[id]
+                        if (r != null) {
+                            Text(
+                                "・${r.name}：" +
+                                    r.inputs.joinToString("＋") { content.materialName(it) },
+                                fontSize = 13.sp,
+                                modifier = Modifier.padding(vertical = 2.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
         item { SectionTitle("記録した反応") }
         item {
             PanelCard {
