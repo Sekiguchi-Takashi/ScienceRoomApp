@@ -132,6 +132,23 @@ data class ElementLearning(
     }
 }
 
+/** 実験ノートの1件。入力条件をすべて残すので同じ結果を再現できる */
+@Serializable
+data class ExperimentLog(
+    val time: Long,
+    val materials: List<String> = emptyList(),
+    val quantities: Map<String, Int> = emptyMap(),
+    val temperature: Int = 0,
+    val duration: Int = 1,
+    val equipment: String? = null,
+    val rank: String = "C",
+    val title: String = "",
+    val reactionId: String? = null,
+    val productId: String? = null,
+    val causes: List<String> = emptyList(),
+    val ruleVersion: String = "1"
+)
+
 @Serializable
 data class PlayerState(
     val exp: Int = 0,
@@ -152,6 +169,7 @@ data class PlayerState(
     val hintLevel: Int = 2,
     val autoHint: Boolean = true,
     val researchLeads: Set<String> = emptySet(),
+    val notebook: List<ExperimentLog> = emptyList(),
     val lastFailureIds: List<String> = emptyList()
 ) {
     val level: Int get() = 1 + exp / 100

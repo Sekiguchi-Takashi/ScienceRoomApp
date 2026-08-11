@@ -178,6 +178,9 @@ object RatioEngine {
 
 object ExperimentEngine {
 
+    /** 判定ルールの版。ノートに残しておくと、後でルールが変わっても結果を読み解ける */
+    const val RULE_VERSION = "1"
+
     fun run(content: Content, state: PlayerState, input: ExperimentInput): ExperimentResult {
         val selected = input.materials.sorted()
 
@@ -355,6 +358,22 @@ object ExperimentEngine {
         }
         val lead = result.leadReactionId
         if (lead != null) s = s.copy(researchLeads = s.researchLeads + lead)
+
+        val log = com.appathy.scienceroom.data.ExperimentLog(
+            time = System.currentTimeMillis(),
+            materials = input.materials,
+            quantities = input.quantities,
+            temperature = input.temperature,
+            duration = input.duration,
+            equipment = input.equipment,
+            rank = result.rank.name,
+            title = result.title,
+            reactionId = result.reaction?.id,
+            productId = result.productId,
+            causes = result.causes.map { it.label + "：" + it.weight },
+            ruleVersion = RULE_VERSION
+        )
+        s = s.copy(notebook = (listOf(log) + s.notebook).take(50))
         return s
     }
 }
@@ -701,6 +720,32 @@ object RecommendEngine {
 
     fun currentResearch(content: Content, state: PlayerState): TechStatus? =
         TechnologyEngine.all(content, state).firstOrNull { !it.completed && it.unlocked }
+}
+
+data class Title(val name: String, val condition: String, val achieved: Boolean)
+
+object TitleEngine {
+
+    fun all(content: Content, state: PlayerState): List<Title> {
+        val sRank = state.notebook.count { it.rank == "S" }
+        return listOf(
+            Title("火をつかう者", "火起こしを完成させる", state.completedTech.contains("fire")),
+            Title("手を動かす人", "実験を10回行う", state.experimentCount >= 10),
+            Title("失敗を数えた人", "失敗を5回記録する", state.failCount >= 5),
+            Title("精度の人", "S判定を1回出す", sRank >= 1),
+            Title("反応の記録者", "反応を10件記録する", state.discoveredReactions.size >= 10),
+            Title("寄り道の名手", "研究候補を3件見つける", state.researchLeads.size >= 3),
+            Title("元素をそらんじる人", "全元素を覚える",
+                state.knownElements.size >= content.elements.size),
+            Title("採集の達人", "素材を20種見つける", state.discoveredMaterials.size >= 20),
+            Title("金属の民", "製鉄を完成させる", state.completedTech.contains("iron")),
+            Title("文明の設計者", "技術をすべて完成させる",
+                state.completedTech.size >= content.technologies.size)
+        )
+    }
+
+    fun current(content: Content, state: PlayerState): String =
+        all(content, state).lastOrNull { it.achieved }?.name ?: "見習い"
 }
 
 data class Skill(val name: String, val value: Int, val note: String)

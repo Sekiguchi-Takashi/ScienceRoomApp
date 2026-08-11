@@ -1,8 +1,5 @@
 package com.appathy.scienceroom.ui
 
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -27,45 +24,75 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.appathy.scienceroom.Game
 import com.appathy.scienceroom.data.ExperimentInput
+import com.appathy.scienceroom.data.ExperimentLog
 import com.appathy.scienceroom.data.ExperimentResult
 import com.appathy.scienceroom.data.Rank
 import com.appathy.scienceroom.engine.Equipment
 import com.appathy.scienceroom.engine.ExperimentEngine
+import com.appathy.scienceroom.engine.RatioEngine
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun LabScreen(game: Game, onNavigate: (String) -> Unit) {
-    var tab by remember { mutableStateOf(0) }
+/** 実験の入力条件。ノートから復元できるようタブをまたいで保持する */
+class LabInput {
+    var selected by mutableStateOf(listOf<String>())
+    var quantities by mutableStateOf(mapOf<String, Int>())
+    var temperature by mutableStateOf(200f)
+    var duration by mutableStateOf(2f)
+    var equipment by mutableStateOf(Equipment.NONE)
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        TabRow(selectedTabIndex = tab) {
-            Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text("実験室") })
-            Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text("温度シミュレーター") })
-        }
-        if (tab == 0) ExperimentPane(game) else TemperaturePane(game)
+    fun restore(log: ExperimentLog) {
+        selected = log.materials
+        quantities = log.quantities
+        temperature = log.temperature.toFloat()
+        duration = log.duration.toFloat()
+        equipment = log.equipment ?: Equipment.NONE
+    }
+
+    fun clear() {
+        selected = emptyList()
+        quantities = emptyMap()
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ExperimentPane(game: Game) {
+fun LabScreen(game: Game, onNavigate: (String) -> Unit) {
+    var tab by remember { mutableStateOf(0) }
+    val input = remember { LabInput() }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        TabRow(selectedTabIndex = tab) {
+            Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text("実験室") })
+            Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text("温度") })
+            Tab(selected = tab == 2, onClick = { tab = 2 }, text = { Text("ノート") })
+        }
+        when (tab) {
+            0 -> ExperimentPane(game, input)
+            1 -> TemperaturePane(game)
+            else -> NotebookPane(game) { log ->
+                input.restore(log)
+                tab = 0
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ExperimentPane(game: Game, input: LabInput) {
     val content = game.content
     val state = game.state
-
-    var selected by remember { mutableStateOf(listOf<String>()) }
-    var quantities by remember { mutableStateOf(mapOf<String, Int>()) }
-    var temperature by remember { mutableStateOf(200f) }
-    var duration by remember { mutableStateOf(2f) }
-    var equipment by remember { mutableStateOf(Equipment.NONE) }
     var result by remember { mutableStateOf<ExperimentResult?>(null) }
 
     val owned = state.inventory.filter { it.value > 0 }.keys.toList()
@@ -93,21 +120,21 @@ private fun ExperimentPane(game: Game) {
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             row.forEach { id ->
-                                val m = content.materialById[id]
                                 FilterChip(
-                                    selected = selected.contains(id),
+                                    selected = input.selected.contains(id),
                                     onClick = {
-                                        if (selected.contains(id)) {
-                                            selected = selected - id
-                                            quantities = quantities - id
+                                        if (input.selected.contains(id)) {
+                                            input.selected = input.selected - id
+                                            input.quantities = input.quantities - id
                                         } else {
-                                            selected = selected + id
-                                            quantities = quantities + (id to 1)
+                                            input.selected = input.selected + id
+                                            input.quantities = input.quantities + (id to 1)
                                         }
                                     },
                                     label = {
                                         Text(
-                                            "${m?.name ?: id} ×${state.inventory[id] ?: 0}",
+                                            content.materialName(id) + " ×" +
+                                                (state.inventory[id] ?: 0),
                                             fontSize = 11.sp
                                         )
                                     }
@@ -119,7 +146,7 @@ private fun ExperimentPane(game: Game) {
             }
         }
 
-        if (selected.isNotEmpty()) {
+        if (input.selected.isNotEmpty()) {
             item { SectionTitle("分量") }
             item {
                 PanelCard {
@@ -129,21 +156,22 @@ private fun ExperimentPane(game: Game) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(Modifier.height(6.dp))
-                    selected.forEach { id ->
-                        val owned = state.inventory[id] ?: 0
-                        val n = quantities[id] ?: 1
+                    input.selected.forEach { id ->
+                        val owns = state.inventory[id] ?: 0
+                        val n = input.quantities[id] ?: 1
                         Row(
                             modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                content.materialName(id) + "（所持 " + owned + "）",
+                                content.materialName(id) + "（所持 " + owns + "）",
                                 fontSize = 13.sp
                             )
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 TextButton(onClick = {
-                                    if (n > 1) quantities = quantities + (id to (n - 1))
+                                    if (n > 1) input.quantities =
+                                        input.quantities + (id to (n - 1))
                                 }) { Text("−", fontSize = 18.sp) }
                                 Text(
                                     n.toString(),
@@ -153,7 +181,8 @@ private fun ExperimentPane(game: Game) {
                                     textAlign = TextAlign.Center
                                 )
                                 TextButton(onClick = {
-                                    if (n < 9) quantities = quantities + (id to (n + 1))
+                                    if (n < 9) input.quantities =
+                                        input.quantities + (id to (n + 1))
                                 }) { Text("＋", fontSize = 16.sp) }
                             }
                         }
@@ -165,22 +194,30 @@ private fun ExperimentPane(game: Game) {
         item { SectionTitle("条件") }
         item {
             PanelCard {
-                Text("温度：${temperature.toInt()} ℃", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    "温度：" + input.temperature.toInt() + " ℃",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
+                )
                 Slider(
-                    value = temperature,
-                    onValueChange = { temperature = it },
+                    value = input.temperature,
+                    onValueChange = { input.temperature = it },
                     valueRange = 0f..1600f
                 )
                 Text(
-                    "この器具で出せる上限：${Equipment.maxTemp(equipment)} ℃",
+                    "この器具で出せる上限：" + Equipment.maxTemp(input.equipment) + " ℃",
                     fontSize = 11.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(Modifier.height(10.dp))
-                Text("時間：${duration.toInt()}", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    "時間：" + input.duration.toInt(),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
+                )
                 Slider(
-                    value = duration,
-                    onValueChange = { duration = it },
+                    value = input.duration,
+                    onValueChange = { input.duration = it },
                     valueRange = 1f..8f,
                     steps = 6
                 )
@@ -189,8 +226,8 @@ private fun ExperimentPane(game: Game) {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     items(equipments) { e ->
                         FilterChip(
-                            selected = equipment == e,
-                            onClick = { equipment = e },
+                            selected = input.equipment == e,
+                            onClick = { input.equipment = e },
                             label = { Text(Equipment.label(e), fontSize = 11.sp) }
                         )
                     }
@@ -201,22 +238,19 @@ private fun ExperimentPane(game: Game) {
         item {
             Button(
                 onClick = {
-                    val input = ExperimentInput(
-                        materials = selected,
-                        quantities = quantities,
-                        temperature = temperature.toInt(),
-                        duration = duration.toInt(),
-                        equipment = equipment
+                    val payload = ExperimentInput(
+                        materials = input.selected,
+                        quantities = input.quantities,
+                        temperature = input.temperature.toInt(),
+                        duration = input.duration.toInt(),
+                        equipment = input.equipment
                     )
-                    val r = ExperimentEngine.run(content, game.state, input)
-                    game.update { ExperimentEngine.applyResult(content, it, input, r) }
+                    val r = ExperimentEngine.run(content, game.state, payload)
+                    game.update { ExperimentEngine.applyResult(content, it, payload, r) }
                     result = r
-                    if (r.rank == Rank.S || r.rank == Rank.A) {
-                        selected = emptyList()
-                        quantities = emptyMap()
-                    }
+                    if (r.rank == Rank.S || r.rank == Rank.A) input.clear()
                 },
-                enabled = selected.isNotEmpty(),
+                enabled = input.selected.isNotEmpty(),
                 modifier = Modifier.fillMaxWidth()
             ) { Text("実験開始") }
         }
@@ -235,28 +269,11 @@ private fun ExperimentPane(game: Game) {
                         val r = content.reactionById[id]
                         if (r != null) {
                             Text(
-                                "・${r.name}：" +
+                                "・" + r.name + "：" +
                                     r.inputs.joinToString("＋") { content.materialName(it) },
                                 fontSize = 13.sp,
                                 modifier = Modifier.padding(vertical = 2.dp)
                             )
-                        }
-                    }
-                }
-            }
-        }
-
-        item { SectionTitle("記録した反応") }
-        item {
-            PanelCard {
-                if (state.discoveredReactions.isEmpty()) {
-                    Text("まだ反応を記録していません", fontSize = 13.sp)
-                } else {
-                    state.discoveredReactions.forEach { id ->
-                        val r = content.reactionById[id]
-                        if (r != null) {
-                            Text("・${r.name}（${r.principle}）", fontSize = 13.sp,
-                                modifier = Modifier.padding(vertical = 2.dp))
                         }
                     }
                 }
@@ -271,9 +288,7 @@ private fun ExperimentPane(game: Game) {
         val success = r.rank == Rank.S || r.rank == Rank.A
         AlertDialog(
             onDismissRequest = { result = null },
-            title = {
-                Text((if (success) "🎉 " else "🤔 ") + r.title + "　［${r.rank}］")
-            },
+            title = { Text((if (success) "🎉 " else "🤔 ") + r.title + "　［" + r.rank + "］") },
             text = {
                 Column {
                     Text("観察", fontWeight = FontWeight.Bold, fontSize = 13.sp)
@@ -283,36 +298,142 @@ private fun ExperimentPane(game: Game) {
                     Text(r.explanation, fontSize = 14.sp)
                     if (r.principle != "—") {
                         Spacer(Modifier.height(6.dp))
-                        Text("科学原理：${r.principle}", fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            "科学原理：" + r.principle,
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                     if (r.causes.isNotEmpty()) {
                         Spacer(Modifier.height(8.dp))
                         Text("主な原因候補", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                         r.causes.forEachIndexed { i, c ->
-                            Text("${i + 1}. ${c.label}：${c.weight}", fontSize = 13.sp)
+                            Text((i + 1).toString() + ". " + c.label + "：" + c.weight, fontSize = 13.sp)
                         }
                     }
                     if (r.hint.isNotEmpty()) {
                         Spacer(Modifier.height(8.dp))
-                        Text("ヒント：${r.hint}", fontSize = 13.sp,
-                            color = MaterialTheme.colorScheme.primary)
+                        Text(
+                            "ヒント：" + r.hint,
+                            fontSize = 13.sp,
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     }
                     if (r.newKnowledge.isNotEmpty()) {
                         Spacer(Modifier.height(8.dp))
-                        r.newKnowledge.forEach { Text("・$it", fontSize = 13.sp) }
+                        r.newKnowledge.forEach { Text("・" + it, fontSize = 13.sp) }
                     }
                     val w = r.warning
                     if (w != null) {
                         Spacer(Modifier.height(8.dp))
-                        Text("⚠ $w", fontSize = 12.sp, color = MaterialTheme.colorScheme.error)
+                        Text("⚠ " + w, fontSize = 12.sp, color = MaterialTheme.colorScheme.error)
                     }
                     Spacer(Modifier.height(8.dp))
-                    Text("経験値 +${r.gainedExp}", fontSize = 12.sp)
+                    Text("経験値 +" + r.gainedExp, fontSize = 12.sp)
                 }
             },
             confirmButton = { TextButton(onClick = { result = null }) { Text("閉じる") } }
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun NotebookPane(game: Game, onReplay: (ExperimentLog) -> Unit) {
+    val content = game.content
+    val state = game.state
+    var filter by remember { mutableStateOf("all") }
+
+    val logs = when (filter) {
+        "success" -> state.notebook.filter { it.rank == "S" || it.rank == "A" }
+        "fail" -> state.notebook.filter { it.rank != "S" && it.rank != "A" }
+        else -> state.notebook
+    }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(14.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        item {
+            Text("実験ノート", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Text(
+                "条件をすべて残しているので、同じ実験をやり直せます",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        item {
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                FilterChip(
+                    selected = filter == "all",
+                    onClick = { filter = "all" },
+                    label = { Text("すべて " + state.notebook.size, fontSize = 11.sp) }
+                )
+                FilterChip(
+                    selected = filter == "success",
+                    onClick = { filter = "success" },
+                    label = { Text("成功", fontSize = 11.sp) }
+                )
+                FilterChip(
+                    selected = filter == "fail",
+                    onClick = { filter = "fail" },
+                    label = { Text("失敗", fontSize = 11.sp) }
+                )
+            }
+        }
+
+        if (logs.isEmpty()) {
+            item {
+                PanelCard { Text("まだ記録がありません", fontSize = 14.sp) }
+            }
+        } else {
+            items(logs) { log ->
+                PanelCard {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(log.title, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                        Text(
+                            "［" + log.rank + "］",
+                            fontSize = 13.sp,
+                            color = if (log.rank == "S" || log.rank == "A")
+                                MaterialTheme.colorScheme.secondary
+                            else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Text(
+                        log.materials.joinToString("＋") {
+                            content.materialName(it) + "×" + (log.quantities[it] ?: 1)
+                        },
+                        fontSize = 13.sp
+                    )
+                    LabeledRow(
+                        "条件",
+                        log.temperature.toString() + "℃／時間" + log.duration +
+                            "／" + Equipment.label(log.equipment)
+                    )
+                    val reaction = log.reactionId?.let { content.reactionById[it] }
+                    if (reaction != null && state.discoveredReactions.contains(reaction.id)) {
+                        val ratio = RatioEngine.describe(content, reaction)
+                        if (ratio.isNotEmpty()) LabeledRow("正解の比", ratio)
+                    }
+                    if (log.causes.isNotEmpty()) {
+                        Text(
+                            "原因候補：" + log.causes.joinToString("、"),
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    TextButton(onClick = { onReplay(log) }) { Text("この条件を読み込む") }
+                }
+            }
+        }
+
+        item { Spacer(Modifier.height(20.dp)) }
     }
 }
 
@@ -351,8 +472,12 @@ private fun TemperaturePane(game: Game) {
                     Spacer(Modifier.width(12.dp))
                     Column {
                         Text(behavior?.name ?: "", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                        Text("${temp.toInt()} ℃", fontSize = 22.sp, fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary)
+                        Text(
+                            temp.toInt().toString() + " ℃",
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     }
                 }
                 Slider(
@@ -370,7 +495,7 @@ private fun TemperaturePane(game: Game) {
                 val warn = range?.warning ?: ""
                 if (warn.isNotEmpty()) {
                     Spacer(Modifier.height(8.dp))
-                    Text("⚠ $warn", fontSize = 12.sp, color = MaterialTheme.colorScheme.error)
+                    Text("⚠ " + warn, fontSize = 12.sp, color = MaterialTheme.colorScheme.error)
                 }
             }
         }

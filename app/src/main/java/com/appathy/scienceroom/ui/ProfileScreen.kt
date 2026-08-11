@@ -33,6 +33,7 @@ import com.appathy.scienceroom.engine.CivilizationEngine
 import com.appathy.scienceroom.engine.HintEngine
 import com.appathy.scienceroom.engine.LearningEngine
 import com.appathy.scienceroom.engine.SkillEngine
+import com.appathy.scienceroom.engine.TitleEngine
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,6 +69,11 @@ fun ProfileScreen(game: Game, onClose: () -> Unit) {
         item {
             PanelCard {
                 Text("科学者レベル ${state.level}", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    TitleEngine.current(content, state),
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.primary
+                )
                 Spacer(Modifier.height(6.dp))
                 LabeledRow("科学知識", "$knowledge %")
                 LabeledRow("発見率", "$discovery %")
@@ -75,6 +81,29 @@ fun ProfileScreen(game: Game, onClose: () -> Unit) {
                 LabeledRow("実験成功率", "${state.successRate()} %")
                 LabeledRow("クイズ正答率", "$accuracy %")
                 LabeledRow("科学的思考力", "$thinking")
+            }
+        }
+
+        item { SectionTitle("称号") }
+        item {
+            PanelCard {
+                TitleEngine.all(content, state).forEach { t ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 1.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            (if (t.achieved) "🏅 " else "・") + t.name,
+                            fontSize = 13.sp,
+                            fontWeight = if (t.achieved) FontWeight.Bold else FontWeight.Normal
+                        )
+                        Text(
+                            t.condition,
+                            fontSize = 10.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
         }
 
