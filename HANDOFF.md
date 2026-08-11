@@ -28,6 +28,12 @@
 - `TechnologyEngine` … 前提技術・素材・知識・反応の充足判定と解禁処理
 - `RecommendEngine` … 次の行動 TOP3 をルールで生成（原則2：判定はルール、AIは説明と推薦）
 
+## 署名
+`keystore/debug.keystore` をリポジトリに含め、debug / release とも固定の鍵で署名する。
+これがないと GitHub Actions が実行ごとに違うデバッグ鍵を作るため、
+新しい APK を入れるたびに「先にアンインストール」が必要になる。この鍵はデバッグ用で、
+Play ストアに出す場合は別途リリース鍵を用意すること。
+
 ## ビルド
 GitHub Actions（`.github/workflows/build.yml`）で `gradle assembleDebug`。
 Actions の artifact から debug APK をダウンロードする。Gradle Wrapper は同梱せず、
@@ -57,6 +63,10 @@ Actions の artifact から debug APK をダウンロードする。Gradle Wrapp
   ずれると失敗原因に「材料の比」が追加される（ずれが小さければ部分成功のB判定）
 - 比を設定した反応は11件（ガラス・銅・スズ・青銅・製鉄・たたら・消石灰・漆喰・釉薬・鋼・灰汁）
 - 図鑑の反応タブに材料比を表示
+
+## v4.1 で入れたもの
+- 固定のデバッグ用キーストアで署名（上の「署名」節）。以後は上書きインストールできる
+- プロフィールに進行データの書き出し / 読み込み。JSON をクリップボード経由でやり取りする
 
 ## v4.0 で入れたもの
 - 実験ノート（`PlayerState.notebook`、直近50件）… 素材・分量・温度・時間・器具・判定・原因候補・

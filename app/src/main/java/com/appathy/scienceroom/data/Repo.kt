@@ -64,6 +64,16 @@ object PlayerRepo {
             .apply()
     }
 
+    /** 進行データをJSON文字列にする（クリップボード経由の退避用） */
+    fun export(state: PlayerState): String = json.encodeToString(state)
+
+    /** 書き出したJSONから復元する。壊れていれば null */
+    fun importFrom(raw: String): PlayerState? = try {
+        json.decodeFromString<PlayerState>(raw.trim())
+    } catch (e: Exception) {
+        null
+    }
+
     fun clear(context: Context) {
         context.getSharedPreferences(PREF, Context.MODE_PRIVATE).edit().remove(KEY).apply()
     }

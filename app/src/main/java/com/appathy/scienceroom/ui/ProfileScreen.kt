@@ -28,7 +28,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import com.appathy.scienceroom.Game
+import com.appathy.scienceroom.data.PlayerRepo
 import com.appathy.scienceroom.engine.CivilizationEngine
 import com.appathy.scienceroom.engine.HintEngine
 import com.appathy.scienceroom.engine.LearningEngine
@@ -42,6 +45,8 @@ fun ProfileScreen(game: Game, onClose: () -> Unit) {
     val content = game.content
     val now = System.currentTimeMillis()
     var confirmReset by remember { mutableStateOf(false) }
+    var dataMessage by remember { mutableStateOf("") }
+    val clipboard = LocalClipboardManager.current
 
     val knowledge = state.knownElements.size * 100 / content.elements.size
     val discovery = state.discoveredMaterials.size * 100 / content.materials.size
@@ -239,7 +244,35 @@ fun ProfileScreen(game: Game, onClose: () -> Unit) {
         item { SectionTitle("データ") }
         item {
             PanelCard {
-                Text("進行データはこの端末に保存されています", fontSize = 12.sp)
+                Text(
+                    "進行データはこの端末に保存されています。アプリを入れ直す前に書き出しておくと、" +
+                        "あとから同じ状態に戻せます",
+                    fontSize = 12.sp
+                )
+                Spacer(Modifier.height(6.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    TextButton(onClick = {
+                        clipboard.setText(AnnotatedString(PlayerRepo.export(state)))
+                        dataMessage = "クリップボードに書き出しました。メモアプリなどに貼って保管してください"
+                    }) { Text("書き出す") }
+                    TextButton(onClick = {
+                        val raw = clipboard.getText()?.text
+                        val loaded = if (raw == null) null else PlayerRepo.importFrom(raw)
+                        if (loaded == null) {
+                            dataMessage = "クリップボードから読み込めませんでした"
+                        } else {
+                            game.replace(loaded)
+                            dataMessage = "読み込みました"
+                        }
+                    }) { Text("読み込む") }
+                }
+                if (dataMessage.isNotEmpty()) {
+                    Text(
+                        dataMessage,
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
                 Spacer(Modifier.height(6.dp))
                 TextButton(onClick = { confirmReset = true }) { Text("最初からやり直す") }
             }

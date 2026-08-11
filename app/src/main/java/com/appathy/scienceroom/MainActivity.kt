@@ -46,6 +46,11 @@ class Game(private val ctx: Context) {
         PlayerRepo.save(ctx, next)
     }
 
+    fun replace(next: PlayerState) {
+        state = next
+        PlayerRepo.save(ctx, next)
+    }
+
     fun reset() {
         PlayerRepo.clear(ctx)
         state = PlayerState()
