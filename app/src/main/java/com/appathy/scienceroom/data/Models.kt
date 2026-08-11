@@ -149,6 +149,15 @@ data class ExperimentLog(
     val ruleVersion: String = "1"
 )
 
+/** 今日のミッションの基準値。日付が変わったら現在値で置き直す */
+@Serializable
+data class DailyProgress(
+    val date: String = "",
+    val quizCorrectBase: Int = 0,
+    val exploreBase: Int = 0,
+    val experimentBase: Int = 0
+)
+
 @Serializable
 data class PlayerState(
     val exp: Int = 0,
@@ -170,6 +179,9 @@ data class PlayerState(
     val autoHint: Boolean = true,
     val researchLeads: Set<String> = emptySet(),
     val notebook: List<ExperimentLog> = emptyList(),
+    val daily: DailyProgress = DailyProgress(),
+    val reminderEnabled: Boolean = false,
+    val reminderHour: Int = 20,
     val lastFailureIds: List<String> = emptyList()
 ) {
     val level: Int get() = 1 + exp / 100

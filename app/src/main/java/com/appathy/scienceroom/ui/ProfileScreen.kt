@@ -28,9 +28,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import com.appathy.scienceroom.Game
+import com.appathy.scienceroom.ReviewReminder
 import com.appathy.scienceroom.data.PlayerRepo
 import com.appathy.scienceroom.engine.CivilizationEngine
 import com.appathy.scienceroom.engine.HintEngine
@@ -47,6 +52,17 @@ fun ProfileScreen(game: Game, onClose: () -> Unit) {
     var confirmReset by remember { mutableStateOf(false) }
     var dataMessage by remember { mutableStateOf("") }
     val clipboard = LocalClipboardManager.current
+    val ctx = LocalContext.current
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            game.update { it.copy(reminderEnabled = true) }
+            ReviewReminder.schedule(ctx, game.state.reminderHour)
+        } else {
+            dataMessage = "通知が許可されなかったため、お知らせは設定できません"
+        }
+    }
 
     val knowledge = state.knownElements.size * 100 / content.elements.size
     val discovery = state.discoveredMaterials.size * 100 / content.materials.size
@@ -203,6 +219,49 @@ fun ProfileScreen(game: Game, onClose: () -> Unit) {
                         if (l == null || l.answered() == 0) "未学習"
                         else "${l.answered()}問・連続${l.streak}"
                     )
+                }
+            }
+        }
+
+        item { SectionTitle("復習のお知らせ") }
+        item {
+            PanelCard {
+                Text(
+                    "覚えた元素は時間とともに忘れます。1日1回だけ、復習どきを知らせます",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    FilterChip(
+                        selected = state.reminderEnabled,
+                        onClick = {
+                            if (state.reminderEnabled) {
+                                game.update { it.copy(reminderEnabled = false) }
+                                ReviewReminder.cancel(ctx)
+                            } else if (Build.VERSION.SDK_INT >= 33) {
+                                permissionLauncher.launch(
+                                    android.Manifest.permission.POST_NOTIFICATIONS
+                                )
+                            } else {
+                                game.update { it.copy(reminderEnabled = true) }
+                                ReviewReminder.schedule(ctx, state.reminderHour)
+                            }
+                        },
+                        label = {
+                            Text(if (state.reminderEnabled) "オン" else "オフ", fontSize = 11.sp)
+                        }
+                    )
+                    listOf(7, 12, 20, 22).forEach { h ->
+                        FilterChip(
+                            selected = state.reminderHour == h,
+                            onClick = {
+                                game.update { it.copy(reminderHour = h) }
+                                if (game.state.reminderEnabled) ReviewReminder.schedule(ctx, h)
+                            },
+                            label = { Text(h.toString() + "時", fontSize = 11.sp) }
+                        )
+                    }
                 }
             }
         }

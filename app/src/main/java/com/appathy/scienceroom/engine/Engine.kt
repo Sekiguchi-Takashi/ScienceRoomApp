@@ -805,12 +805,49 @@ object RoadmapEngine {
         content.technologies.filter { it.requiredTech.contains(id) }
 }
 
-data class Mission(val text: String, val done: Boolean)
+data class Mission(val text: String, val current: Int, val goal: Int) {
+    val done: Boolean get() = current >= goal
+}
 
 object MissionEngine {
-    fun today(state: PlayerState): List<Mission> = listOf(
-        Mission("元素クイズに5問正解する", state.quizCorrect % 5 == 0 && state.quizCorrect > 0),
-        Mission("素材を1個発見する", state.discoveredMaterials.isNotEmpty()),
-        Mission("実験を1回行う", state.experimentCount > 0)
-    )
+
+    fun today(state: PlayerState): List<Mission> {
+        val d = state.daily
+        return listOf(
+            Mission(
+                "元素クイズに5問正解する",
+                (state.quizCorrect - d.quizCorrectBase).coerceAtLeast(0), 5
+            ),
+            Mission(
+                "探索を3回する",
+                (state.exploreCount - d.exploreBase).coerceAtLeast(0), 3
+            ),
+            Mission(
+                "実験を2回行う",
+                (state.experimentCount - d.experimentBase).coerceAtLeast(0), 2
+            )
+        )
+    }
+
+    /** 日付が変わっていれば基準値を今の値で置き直す */
+    fun rollover(state: PlayerState, today: String): PlayerState {
+        if (state.daily.date == today) return state
+        return state.copy(
+            daily = com.appathy.scienceroom.data.DailyProgress(
+                date = today,
+                quizCorrectBase = state.quizCorrect,
+                exploreBase = state.exploreCount,
+                experimentBase = state.experimentCount
+            )
+        )
+    }
+}
+
+object ReviewEngine {
+    /** 復習の期限が来ている元素の数 */
+    fun dueCount(content: Content, state: PlayerState, now: Long): Int =
+        content.elements.count { e ->
+            val l = state.learning[e.id]
+            l != null && l.nextReview in 1..now
+        }
 }

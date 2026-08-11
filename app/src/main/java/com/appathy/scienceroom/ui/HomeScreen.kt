@@ -146,11 +146,20 @@ fun HomeScreen(game: Game, onNavigate: (String) -> Unit) {
         item {
             PanelCard {
                 missions.forEach { m ->
-                    Text(
-                        (if (m.done) "☑ " else "☐ ") + m.text,
-                        fontSize = 14.sp,
-                        modifier = Modifier.padding(vertical = 2.dp)
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            (if (m.done) "☑ " else "☐ ") + m.text,
+                            fontSize = 14.sp
+                        )
+                        Text(
+                            m.current.coerceAtMost(m.goal).toString() + " / " + m.goal,
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
         }

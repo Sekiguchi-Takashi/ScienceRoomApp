@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import com.appathy.scienceroom.data.Content
 import com.appathy.scienceroom.data.PlayerRepo
 import com.appathy.scienceroom.data.PlayerState
+import com.appathy.scienceroom.engine.MissionEngine
 import com.appathy.scienceroom.ui.EncyclopediaScreen
 import com.appathy.scienceroom.ui.HomeScreen
 import com.appathy.scienceroom.ui.LabScreen
@@ -39,6 +40,16 @@ class Game(private val ctx: Context) {
 
     var state by mutableStateOf(PlayerRepo.load(ctx))
         private set
+
+    init {
+        val today = java.time.LocalDate.now().toString()
+        val rolled = MissionEngine.rollover(state, today)
+        if (rolled !== state) {
+            state = rolled
+            PlayerRepo.save(ctx, rolled)
+        }
+        ReviewReminder.sync(ctx)
+    }
 
     fun update(transform: (PlayerState) -> PlayerState) {
         val next = transform(state)
