@@ -10,7 +10,9 @@
   ],
   "requiredElements": [],
   "requiredReactions": [],
-  "unlocksLocations": [],
+  "unlocksLocations": [
+   "grassland"
+  ],
   "unlocksMaterials": [
    "ash"
   ],
@@ -77,7 +79,8 @@
    "r_pottery"
   ],
   "unlocksLocations": [
-   "sea"
+   "sea",
+   "lake"
   ],
   "unlocksMaterials": [
    "pottery_ware"
@@ -248,7 +251,9 @@
   "requiredReactions": [
    "r_iron"
   ],
-  "unlocksLocations": [],
+  "unlocksLocations": [
+   "volcano"
+  ],
   "unlocksMaterials": [
    "iron"
   ],
@@ -276,7 +281,7 @@
  {
   "id": "lye",
   "name": "灰汁",
-  "imageId": "mat_ash",
+  "imageId": "tech_lye",
   "description": "灰を水に浸してアルカリ性の液を取り出す",
   "requiredTech": [
    "pottery"
@@ -300,7 +305,7 @@
  {
   "id": "plaster",
   "name": "漆喰",
-  "imageId": "tech_lime",
+  "imageId": "tech_plaster",
   "description": "消石灰を水で練り、乾かして固める",
   "requiredTech": [
    "lime"
@@ -324,7 +329,7 @@
  {
   "id": "masonry",
   "name": "石積み建築",
-  "imageId": "tech_kiln",
+  "imageId": "tech_masonry",
   "description": "石を漆喰でつなぎ、崩れない壁を築く",
   "requiredTech": [
    "plaster"
@@ -342,7 +347,7 @@
  {
   "id": "glaze",
   "name": "釉薬",
-  "imageId": "tech_pottery",
+  "imageId": "tech_glaze",
   "description": "灰と石英で器の表面をガラスの膜で覆う",
   "requiredTech": [
    "pottery",
@@ -367,7 +372,7 @@
  {
   "id": "porcelain",
   "name": "磁器",
-  "imageId": "tech_pottery",
+  "imageId": "tech_porcelain",
   "description": "より高い温度で焼き締め、薄く硬い器をつくる",
   "requiredTech": [
    "glaze"
@@ -387,7 +392,7 @@
  {
   "id": "glassware",
   "name": "ガラス器",
-  "imageId": "eq_flask",
+  "imageId": "tech_glassware",
   "description": "融けたガラスを吹いて中の見える器をつくる",
   "requiredTech": [
    "glass"
@@ -408,7 +413,7 @@
  {
   "id": "casting",
   "name": "鋳造",
-  "imageId": "tech_crucible",
+  "imageId": "tech_casting",
   "description": "融けた金属を型に流し、複雑な形をつくる",
   "requiredTech": [
    "bronze"
@@ -426,7 +431,7 @@
  {
   "id": "forging",
   "name": "鍛冶",
-  "imageId": "tech_iron",
+  "imageId": "tech_forging",
   "description": "熱した鉄を叩いて不純物を出し、形を整える",
   "requiredTech": [
    "iron"
@@ -446,7 +451,7 @@
  {
   "id": "steel",
   "name": "鋼",
-  "imageId": "elem_fe",
+  "imageId": "tech_steel",
   "description": "鉄に炭素を染み込ませ、硬くて折れにくくする",
   "requiredTech": [
    "forging"
@@ -470,7 +475,7 @@
  {
   "id": "distillation",
   "name": "蒸留",
-  "imageId": "eq_burner",
+  "imageId": "tech_distillation",
   "description": "沸点の違いを使って混ざったものを分ける",
   "requiredTech": [
    "glassware"
@@ -495,7 +500,7 @@
  {
   "id": "microscope",
   "name": "顕微鏡",
-  "imageId": "tech_lens",
+  "imageId": "tech_microscope",
   "description": "レンズを重ね、目に見えない小ささを見る",
   "requiredTech": [
    "lens",
@@ -513,7 +518,7 @@
  {
   "id": "telescope",
   "name": "望遠鏡",
-  "imageId": "tech_lens",
+  "imageId": "tech_telescope",
   "description": "レンズと金属の筒で遠くを引き寄せる",
   "requiredTech": [
    "lens",

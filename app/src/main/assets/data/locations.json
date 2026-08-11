@@ -82,5 +82,54 @@
   "danger": 3,
   "unlockedBy": "bronze",
   "description": "地下水が刻んだ空洞。鉱脈と塩の層が眠る"
+ },
+ {
+  "id": "grassland",
+  "name": "草原",
+  "imageId": "loc_grassland",
+  "environment": "風の通る広い草地",
+  "materials": [
+   "wood",
+   "ash",
+   "clay",
+   "limestone"
+  ],
+  "difficulty": 1,
+  "danger": 1,
+  "unlockedBy": "fire",
+  "description": "見晴らしのよい草地。枯れ草を焼いた跡から灰が集まり、露出した石灰岩も転がる"
+ },
+ {
+  "id": "lake",
+  "name": "湖",
+  "imageId": "loc_lake",
+  "environment": "朝もやの高原湖",
+  "materials": [
+   "water",
+   "clay",
+   "iron_sand",
+   "quartz",
+   "shell"
+  ],
+  "difficulty": 2,
+  "danger": 1,
+  "unlockedBy": "pottery",
+  "description": "波の立たない静かな水面。岸の泥と砂の層に細かい粒がたまっている"
+ },
+ {
+  "id": "volcano",
+  "name": "火山",
+  "imageId": "loc_volcano",
+  "environment": "噴気の上がる火口斜面",
+  "materials": [
+   "sulfur",
+   "hematite",
+   "quartz",
+   "limestone"
+  ],
+  "difficulty": 5,
+  "danger": 4,
+  "unlockedBy": "iron",
+  "description": "黒い火山礫と黄色い噴気孔。近づくには熱と気体への備えが要る"
  }
 ]

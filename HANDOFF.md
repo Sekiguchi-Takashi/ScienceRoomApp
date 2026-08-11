@@ -15,10 +15,10 @@
 | ファイル | 中身 |
 |---|---|
 | elements.json | 元素 16 |
-| materials.json | 素材 26（自然 16 + 加工 10） |
-| locations.json | 地域 5（森・川・山・海岸・洞窟） |
-| technologies.json | 技術 12（火起こし → レンズ） |
-| reactions.json | 反応 13 |
+| materials.json | 素材 32（自然 16 + 加工 16） |
+| locations.json | 地域 8（森・川・山・海岸・洞窟・草原・湖・火山） |
+| technologies.json | 技術 24（火起こし → 望遠鏡） |
+| reactions.json | 反応 19 |
 | temperature.json | 温度挙動 8 物質 |
 
 ## エンジン（`engine/Engine.kt`）
@@ -51,10 +51,17 @@ Actions の artifact から debug APK をダウンロードする。Gradle Wrapp
 - 目標設定（`PlayerState.currentGoal`）… ホームに目標と次の3手を表示
 - `CivilizationEngine` … 完成した技術の系統（窯業 / 金属 / ガラス・光学 / 化学）から文明の傾向を判定してプロフィールに表示
 
+## v3.5 で入れたもの
+- 実験に分量を追加（`ExperimentInput.quantities`）。素材ごとに 1〜9 で指定し、所持数を超えると実行前に止まる
+- `RatioEngine` … `reactions.json` の `ratios` と入れた量を最大公約数で正規化して比較。
+  ずれると失敗原因に「材料の比」が追加される（ずれが小さければ部分成功のB判定）
+- 比を設定した反応は11件（ガラス・銅・スズ・青銅・製鉄・たたら・消石灰・漆喰・釉薬・鋼・灰汁）
+- 図鑑の反応タブに材料比を表示
+
 ## 次にやること
-- 新規技術12ノードのアイコンが既存画像の使い回し。専用アイコンを作ると見分けがつく
-- 多地域探索の拡張には背景画像が3枚要る（火山・湖・草原）
-- 実験の分量と材料比の判定（仕様書10節の `quantity_match`）は未実装
+- 未着手の画像：`tech_casting`（鋳造）と完成品4枚 `mat_tin` `mat_bronze` `mat_iron` `mat_steel`
+- `tech_forging` と `tech_steel` の絵がほぼ同じ（どちらも金床＋ハンマー）。鋼は浸炭と焼き入れの構図にすると区別がつく
+- `tech_plaster` は白い壁が主役の絵のため、1枚だけ不透過の四角で入っている
 - AI 科学助手のオンライン連携（現状はルールベースのローカル推薦のみ）
 - クラウド同期とイベント
 - `tech_salt` / `tech_lens` の画像差し替え、`elem_au` の刻印がクイズの答えを示す問題

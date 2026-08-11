@@ -75,6 +75,7 @@ data class Reaction(
     val maxTemp: Int,
     val minDuration: Int,
     val equipment: String? = null,
+    val ratios: Map<String, Int>? = null,
     val product: String,
     val observation: String,
     val explanation: String,
@@ -165,10 +166,13 @@ data class PlayerState(
 /** 実験の入力条件 */
 data class ExperimentInput(
     val materials: List<String>,
+    val quantities: Map<String, Int> = emptyMap(),
     val temperature: Int,
     val duration: Int,
     val equipment: String?
-)
+) {
+    fun amount(id: String): Int = quantities[id] ?: 1
+}
 
 enum class Rank { S, A, B, C, D }
 

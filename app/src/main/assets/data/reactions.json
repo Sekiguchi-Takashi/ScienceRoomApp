@@ -93,7 +93,11 @@
   "changeType": "化学変化",
   "danger": 3,
   "simulationOnly": false,
-  "exp": 25
+  "exp": 25,
+  "ratios": {
+   "quicklime": 1,
+   "water": 1
+  }
  },
  {
   "id": "r_salt",
@@ -148,12 +152,17 @@
   "equipment": "kiln",
   "product": "glass",
   "observation": "砂がどろりとした赤い液になり、冷えると透きとおった塊になった",
-  "explanation": "石英だけでは1700℃を超えないと融けない。灰と石灰を加えると融点が下がり、炉の温度でも融ける",
+  "explanation": "石英だけでは1700℃を超えないと融けない。灰と石灰を加えると融点が下がり、炉の温度でも融ける。石英が主体で、灰と石灰は融点を下げるために少量加える",
   "principle": "融剤による融点降下",
   "changeType": "化学変化",
   "danger": 3,
   "simulationOnly": false,
-  "exp": 40
+  "exp": 40,
+  "ratios": {
+   "quartz": 3,
+   "ash": 1,
+   "limestone": 1
+  }
  },
  {
   "id": "r_copper",
@@ -173,7 +182,11 @@
   "changeType": "化学変化",
   "danger": 3,
   "simulationOnly": false,
-  "exp": 40
+  "exp": 40,
+  "ratios": {
+   "malachite": 2,
+   "charcoal": 1
+  }
  },
  {
   "id": "r_tin",
@@ -193,7 +206,11 @@
   "changeType": "化学変化",
   "danger": 3,
   "simulationOnly": false,
-  "exp": 40
+  "exp": 40,
+  "ratios": {
+   "cassiterite": 2,
+   "charcoal": 1
+  }
  },
  {
   "id": "r_bronze",
@@ -208,12 +225,16 @@
   "equipment": "crucible",
   "product": "bronze",
   "observation": "二つの金属が溶け合い、冷えると銅より硬く黄色みを帯びた塊になった",
-  "explanation": "銅にスズを一割ほど混ぜると、原子の並びがずれにくくなって硬くなる。融点も下がって鋳やすい",
+  "explanation": "銅にスズを一割ほど混ぜると、原子の並びがずれにくくなって硬くなる。融点も下がって鋳やすい。銅にスズを1割ほど混ぜると硬くなる。ここでは扱いやすく4対1で表している",
   "principle": "合金化",
   "changeType": "化学変化",
   "danger": 3,
   "simulationOnly": false,
-  "exp": 50
+  "exp": 50,
+  "ratios": {
+   "copper": 4,
+   "tin": 1
+  }
  },
  {
   "id": "r_iron",
@@ -228,12 +249,16 @@
   "equipment": "bellows_kiln",
   "product": "iron",
   "observation": "炉の底に、灰と混じった海綿のような鉄の塊が残った",
-  "explanation": "炭が鉄鉱石から酸素を奪う。銅より高い温度と強い送風が要るため、ふいごが欠かせない",
+  "explanation": "炭が鉄鉱石から酸素を奪う。銅より高い温度と強い送風が要るため、ふいごが欠かせない。鉱石より炭を多く要る。炭は酸素を奪う役と燃料の役を兼ねるため",
   "principle": "炭素による還元 Fe2O3 + 3C → 2Fe + 3CO",
   "changeType": "化学変化",
   "danger": 4,
   "simulationOnly": false,
-  "exp": 60
+  "exp": 60,
+  "ratios": {
+   "hematite": 1,
+   "charcoal": 2
+  }
  },
  {
   "id": "r_tatara",
@@ -248,12 +273,16 @@
   "equipment": "bellows_kiln",
   "product": "iron",
   "observation": "砂鉄が炭の層の間で固まり、鉄の塊になった",
-  "explanation": "砂鉄も鉄の酸化物。粒が細かいぶん炭とよく触れ、同じ還元が進む",
+  "explanation": "砂鉄も鉄の酸化物。粒が細かいぶん炭とよく触れ、同じ還元が進む。砂鉄より炭が多く要る。炭は還元剤と燃料を兼ねる",
   "principle": "炭素による還元",
   "changeType": "化学変化",
   "danger": 4,
   "simulationOnly": false,
-  "exp": 60
+  "exp": 60,
+  "ratios": {
+   "iron_sand": 1,
+   "charcoal": 2
+  }
  },
  {
   "id": "r_lye",
@@ -273,7 +302,11 @@
   "changeType": "物理変化",
   "danger": 2,
   "simulationOnly": false,
-  "exp": 20
+  "exp": 20,
+  "ratios": {
+   "ash": 1,
+   "water": 3
+  }
  },
  {
   "id": "r_plaster",
@@ -293,7 +326,11 @@
   "changeType": "化学変化",
   "danger": 2,
   "simulationOnly": false,
-  "exp": 25
+  "exp": 25,
+  "ratios": {
+   "slaked_lime": 2,
+   "water": 1
+  }
  },
  {
   "id": "r_glaze",
@@ -314,7 +351,12 @@
   "changeType": "化学変化",
   "danger": 2,
   "simulationOnly": false,
-  "exp": 35
+  "exp": 35,
+  "ratios": {
+   "ash": 1,
+   "quartz": 1,
+   "clay": 1
+  }
  },
  {
   "id": "r_glassware",
@@ -353,7 +395,11 @@
   "changeType": "化学変化",
   "danger": 4,
   "simulationOnly": false,
-  "exp": 60
+  "exp": 60,
+  "ratios": {
+   "iron": 3,
+   "charcoal": 1
+  }
  },
  {
   "id": "r_distill",

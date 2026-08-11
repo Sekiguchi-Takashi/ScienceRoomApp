@@ -145,6 +145,37 @@ object SerendipityEngine {
     }
 }
 
+object RatioEngine {
+
+    private fun gcd(a: Int, b: Int): Int = if (b == 0) a else gcd(b, a % b)
+
+    private fun normalize(values: List<Int>): List<Int> {
+        val g = values.fold(0) { acc, v -> gcd(acc, v) }
+        if (g <= 1) return values
+        return values.map { it / g }
+    }
+
+    /** 0 なら一致。数字が大きいほど比のずれが大きい */
+    fun deviation(reaction: Reaction, input: ExperimentInput): Int {
+        val want = reaction.ratios ?: return 0
+        if (want.isEmpty()) return 0
+        val given = normalize(reaction.inputs.map { input.amount(it) })
+        val target = normalize(reaction.inputs.map { want[it] ?: 1 })
+        if (given == target) return 0
+        return given.indices.sumOf { i ->
+            kotlin.math.abs(given[i] - target[i])
+        }
+    }
+
+    fun describe(content: Content, reaction: Reaction): String {
+        val want = reaction.ratios ?: return ""
+        if (want.isEmpty()) return ""
+        return reaction.inputs.joinToString(" : ") {
+            content.materialName(it) + " " + (want[it] ?: 1)
+        }
+    }
+}
+
 object ExperimentEngine {
 
     fun run(content: Content, state: PlayerState, input: ExperimentInput): ExperimentResult {
@@ -193,6 +224,20 @@ object ExperimentEngine {
             )
         }
 
+        val short = selected.filter { (state.inventory[it] ?: 0) < input.amount(it) }
+        if (short.isNotEmpty()) {
+            return ExperimentResult(
+                Rank.D, exact, null, "素材不足",
+                "指定した分量に足りず、実験を始められなかった",
+                "手持ちより多い量を入れようとしている。探索して集めるか、量を減らそう",
+                "—",
+                listOf(FailureCause("素材の所持数", "高")),
+                "不足：" + short.joinToString("、") { content.materialName(it) },
+                0, emptyList(), null
+            )
+        }
+
+        val ratioDeviation = RatioEngine.deviation(exact, input)
         val tempOk = input.temperature in exact.minTemp..exact.maxTemp
         val durOk = input.duration >= exact.minDuration
         val equipOk = Equipment.satisfies(input.equipment, exact.equipment)
@@ -209,6 +254,9 @@ object ExperimentEngine {
             causes.add(FailureCause("加熱時間", if (gap > 2) "高" else "中"))
         }
         if (!equipOk) causes.add(FailureCause("器具", "高"))
+        if (ratioDeviation > 0) {
+            causes.add(FailureCause("材料の比", if (ratioDeviation >= 3) "高" else "中"))
+        }
         if (!reachable) causes.add(FailureCause("器具の到達温度", "高"))
 
         if (causes.isEmpty()) {
@@ -264,15 +312,18 @@ object ExperimentEngine {
                 "温度条件" -> if (input.temperature < r.minTemp) "今の温度では足りていない可能性がある"
                 else "温度が高すぎる可能性がある"
                 "加熱時間" -> "もう少し長く加熱する必要がありそうだ"
+                "材料の比" -> "材料はそろっているが、入れる量のつり合いが取れていないようだ"
                 else -> "使っている器具では条件を満たせていない可能性がある"
             }
             4 -> when (top) {
                 "温度条件" -> "温度を変えて再実験してみよう"
                 "加熱時間" -> "時間を延ばして再実験してみよう"
+                "材料の比" -> "どれかの量を増やすか減らすかして、比を変えてみよう"
                 else -> "別の器具を使って再実験してみよう"
             }
             else -> "「${r.name}」は${r.minTemp}〜${r.maxTemp}℃、${r.minDuration}以上の時間、" +
-                "器具は${Equipment.label(r.equipment)}が必要だ"
+                "器具は${Equipment.label(r.equipment)}が必要だ" +
+                if (r.ratios.isNullOrEmpty()) "" else "。材料の比は " + RatioEngine.describe(content, r)
         }
     }
 
@@ -284,7 +335,7 @@ object ExperimentEngine {
         if (result.rank == Rank.S || result.rank == Rank.A) {
             val inv = s.inventory.toMutableMap()
             input.materials.forEach { id ->
-                val left = (inv[id] ?: 0) - 1
+                val left = (inv[id] ?: 0) - input.amount(id)
                 if (left <= 0) inv.remove(id) else inv[id] = left
             }
             val productId = result.productId

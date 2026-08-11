@@ -13,8 +13,8 @@ android {
         applicationId = "com.appathy.scienceroom"
         minSdk = 26
         targetSdk = 34
-        versionCode = 3
-        versionName = "1.2"
+        versionCode = 8
+        versionName = "1.7"
     }
 
     buildTypes {

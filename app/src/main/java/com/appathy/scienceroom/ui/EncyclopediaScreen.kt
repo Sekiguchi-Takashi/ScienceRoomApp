@@ -192,6 +192,9 @@ fun EncyclopediaScreen(game: Game, onNavigate: (String) -> Unit) {
                                     fontSize = 13.sp
                                 )
                                 LabeledRow("条件", "${r.minTemp}〜${r.maxTemp}℃／時間${r.minDuration}以上")
+                                val ratio = com.appathy.scienceroom.engine.RatioEngine
+                                    .describe(content, r)
+                                if (ratio.isNotEmpty()) LabeledRow("材料の比", ratio)
                                 LabeledRow("器具", com.appathy.scienceroom.engine.Equipment.label(r.equipment))
                                 LabeledRow("種類", r.changeType)
                                 Spacer(Modifier.height(4.dp))

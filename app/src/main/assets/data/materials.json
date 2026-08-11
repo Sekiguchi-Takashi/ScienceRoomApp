@@ -318,7 +318,7 @@
  {
   "id": "quicklime",
   "name": "生石灰",
-  "imageId": "mat_limestone",
+  "imageId": "mat_quicklime",
   "composition": "CaO",
   "elements": [
    "ca",
@@ -335,7 +335,7 @@
  {
   "id": "slaked_lime",
   "name": "消石灰",
-  "imageId": "mat_ash",
+  "imageId": "mat_slaked_lime",
   "composition": "Ca(OH)2",
   "elements": [
    "ca",
@@ -353,7 +353,7 @@
  {
   "id": "pottery_ware",
   "name": "土器",
-  "imageId": "tech_pottery",
+  "imageId": "mat_pottery_ware",
   "composition": "焼成粘土",
   "elements": [
    "si",
@@ -371,7 +371,7 @@
  {
   "id": "glass",
   "name": "ガラス",
-  "imageId": "tech_glass",
+  "imageId": "mat_glass",
   "composition": "SiO2 + Na2O + CaO",
   "elements": [
    "si",
@@ -390,7 +390,7 @@
  {
   "id": "copper",
   "name": "銅",
-  "imageId": "elem_cu",
+  "imageId": "mat_copper",
   "composition": "Cu",
   "elements": [
    "cu"
@@ -406,7 +406,7 @@
  {
   "id": "tin",
   "name": "スズ",
-  "imageId": "elem_sn",
+  "imageId": "mat_tin",
   "composition": "Sn",
   "elements": [
    "sn"
@@ -422,7 +422,7 @@
  {
   "id": "bronze",
   "name": "青銅",
-  "imageId": "tech_bronze",
+  "imageId": "mat_bronze",
   "composition": "Cu + Sn",
   "elements": [
    "cu",
@@ -439,7 +439,7 @@
  {
   "id": "iron",
   "name": "鉄",
-  "imageId": "elem_fe",
+  "imageId": "mat_iron",
   "composition": "Fe",
   "elements": [
    "fe"
@@ -455,7 +455,7 @@
  {
   "id": "salt",
   "name": "塩",
-  "imageId": "mat_rock_salt",
+  "imageId": "mat_salt",
   "composition": "NaCl",
   "elements": [
    "na",
@@ -472,7 +472,7 @@
  {
   "id": "brine",
   "name": "食塩水",
-  "imageId": "mat_seawater",
+  "imageId": "mat_brine",
   "composition": "NaCl aq",
   "elements": [
    "na",
@@ -491,7 +491,7 @@
  {
   "id": "lye",
   "name": "灰汁",
-  "imageId": "mat_ash",
+  "imageId": "mat_lye",
   "composition": "K2CO3 aq",
   "elements": [
    "k",
@@ -510,7 +510,7 @@
  {
   "id": "plaster",
   "name": "漆喰",
-  "imageId": "tech_lime",
+  "imageId": "mat_plaster",
   "composition": "Ca(OH)2 + 砂",
   "elements": [
    "ca",
@@ -529,7 +529,7 @@
  {
   "id": "glaze",
   "name": "釉薬",
-  "imageId": "tech_pottery",
+  "imageId": "mat_glaze",
   "composition": "灰 + SiO2 + 粘土",
   "elements": [
    "k",
@@ -549,7 +549,7 @@
  {
   "id": "glassware",
   "name": "ガラス器",
-  "imageId": "eq_flask",
+  "imageId": "mat_glassware",
   "composition": "SiO2 系",
   "elements": [
    "si",
@@ -568,7 +568,7 @@
  {
   "id": "steel",
   "name": "鋼",
-  "imageId": "elem_fe",
+  "imageId": "mat_steel",
   "composition": "Fe + C",
   "elements": [
    "fe",
@@ -585,7 +585,7 @@
  {
   "id": "distilled_water",
   "name": "蒸留水",
-  "imageId": "mat_water",
+  "imageId": "mat_distilled_water",
   "composition": "H2O",
   "elements": [
    "h",

@@ -1,5 +1,6 @@
 package com.appathy.scienceroom.ui
 
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.Arrangement
@@ -61,6 +62,7 @@ private fun ExperimentPane(game: Game) {
     val state = game.state
 
     var selected by remember { mutableStateOf(listOf<String>()) }
+    var quantities by remember { mutableStateOf(mapOf<String, Int>()) }
     var temperature by remember { mutableStateOf(200f) }
     var duration by remember { mutableStateOf(2f) }
     var equipment by remember { mutableStateOf(Equipment.NONE) }
@@ -95,8 +97,13 @@ private fun ExperimentPane(game: Game) {
                                 FilterChip(
                                     selected = selected.contains(id),
                                     onClick = {
-                                        selected = if (selected.contains(id)) selected - id
-                                        else selected + id
+                                        if (selected.contains(id)) {
+                                            selected = selected - id
+                                            quantities = quantities - id
+                                        } else {
+                                            selected = selected + id
+                                            quantities = quantities + (id to 1)
+                                        }
                                     },
                                     label = {
                                         Text(
@@ -105,6 +112,49 @@ private fun ExperimentPane(game: Game) {
                                         )
                                     }
                                 )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (selected.isNotEmpty()) {
+            item { SectionTitle("分量") }
+            item {
+                PanelCard {
+                    Text(
+                        "反応によっては入れる量のつり合いが結果を変えます",
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    selected.forEach { id ->
+                        val owned = state.inventory[id] ?: 0
+                        val n = quantities[id] ?: 1
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                content.materialName(id) + "（所持 " + owned + "）",
+                                fontSize = 13.sp
+                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                TextButton(onClick = {
+                                    if (n > 1) quantities = quantities + (id to (n - 1))
+                                }) { Text("−", fontSize = 18.sp) }
+                                Text(
+                                    n.toString(),
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.width(28.dp),
+                                    textAlign = TextAlign.Center
+                                )
+                                TextButton(onClick = {
+                                    if (n < 9) quantities = quantities + (id to (n + 1))
+                                }) { Text("＋", fontSize = 16.sp) }
                             }
                         }
                     }
@@ -153,6 +203,7 @@ private fun ExperimentPane(game: Game) {
                 onClick = {
                     val input = ExperimentInput(
                         materials = selected,
+                        quantities = quantities,
                         temperature = temperature.toInt(),
                         duration = duration.toInt(),
                         equipment = equipment
@@ -160,7 +211,10 @@ private fun ExperimentPane(game: Game) {
                     val r = ExperimentEngine.run(content, game.state, input)
                     game.update { ExperimentEngine.applyResult(content, it, input, r) }
                     result = r
-                    if (r.rank == Rank.S || r.rank == Rank.A) selected = emptyList()
+                    if (r.rank == Rank.S || r.rank == Rank.A) {
+                        selected = emptyList()
+                        quantities = emptyMap()
+                    }
                 },
                 enabled = selected.isNotEmpty(),
                 modifier = Modifier.fillMaxWidth()
