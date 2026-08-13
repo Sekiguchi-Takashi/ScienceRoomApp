@@ -533,5 +533,132 @@
   "unlocksLocations": [],
   "unlocksMaterials": [],
   "difficulty": 5
+ },
+ {
+  "id": "zinc",
+  "name": "亜鉛の製錬",
+  "imageId": "mat_sphalerite",
+  "description": "逃げていく蒸気を冷やして金属として捕まえる",
+  "requiredTech": [
+   "crucible",
+   "bronze"
+  ],
+  "requiredMaterials": [
+   "sphalerite",
+   "charcoal"
+  ],
+  "requiredElements": [
+   "zn"
+  ],
+  "requiredReactions": [
+   "r_zinc"
+  ],
+  "unlocksLocations": [],
+  "unlocksMaterials": [
+   "zinc"
+  ],
+  "difficulty": 5
+ },
+ {
+  "id": "lead",
+  "name": "鉛の製錬",
+  "imageId": "mat_galena",
+  "description": "低い温度でとける重い金属を取り出す",
+  "requiredTech": [
+   "kiln",
+   "bronze"
+  ],
+  "requiredMaterials": [
+   "galena",
+   "charcoal"
+  ],
+  "requiredElements": [
+   "pb"
+  ],
+  "requiredReactions": [
+   "r_lead"
+  ],
+  "unlocksLocations": [],
+  "unlocksMaterials": [
+   "lead"
+  ],
+  "difficulty": 4
+ },
+ {
+  "id": "brass",
+  "name": "真鍮",
+  "imageId": "tech_brass",
+  "description": "銅と亜鉛を混ぜ、よく響く黄金色の合金をつくる",
+  "requiredTech": [
+   "zinc"
+  ],
+  "requiredMaterials": [
+   "copper",
+   "zinc"
+  ],
+  "requiredElements": [
+   "cu",
+   "zn"
+  ],
+  "requiredReactions": [
+   "r_brass"
+  ],
+  "unlocksLocations": [],
+  "unlocksMaterials": [
+   "brass"
+  ],
+  "difficulty": 5
+ },
+ {
+  "id": "solder",
+  "name": "はんだ",
+  "imageId": "tech_solder",
+  "description": "低い温度でとける合金で、金属どうしをつなぐ",
+  "requiredTech": [
+   "casting",
+   "lead"
+  ],
+  "requiredMaterials": [
+   "tin",
+   "lead"
+  ],
+  "requiredElements": [
+   "sn",
+   "pb"
+  ],
+  "requiredReactions": [
+   "r_solder"
+  ],
+  "unlocksLocations": [],
+  "unlocksMaterials": [
+   "solder"
+  ],
+  "difficulty": 4
+ },
+ {
+  "id": "cupellation",
+  "name": "灰吹法",
+  "imageId": "tech_cupellation",
+  "description": "鉛に溶かし込んでから鉛だけを灰に吸わせ、銀を残す",
+  "requiredTech": [
+   "lead",
+   "lime"
+  ],
+  "requiredMaterials": [
+   "argentite",
+   "lead",
+   "quicklime"
+  ],
+  "requiredElements": [
+   "ag"
+  ],
+  "requiredReactions": [
+   "r_cupel"
+  ],
+  "unlocksLocations": [],
+  "unlocksMaterials": [
+   "silver"
+  ],
+  "difficulty": 5
  }
 ]

@@ -19,7 +19,9 @@ data class Element(
     val uses: String,
     val property: String,
     val danger: Int,
-    val imageId: String
+    val imageId: String,
+    val group: Int = 0,
+    val period: Int = 0
 )
 
 @Serializable
@@ -154,9 +156,31 @@ data class ExperimentLog(
 data class DailyProgress(
     val date: String = "",
     val quizCorrectBase: Int = 0,
+    val quizCountBase: Int = 0,
     val exploreBase: Int = 0,
-    val experimentBase: Int = 0
+    val experimentBase: Int = 0,
+    val successBase: Int = 0,
+    val knownElementsBase: Int = 0,
+    val materialsBase: Int = 0
 )
+
+/** 1日分の活動量。日付が変わったときに確定させる */
+@Serializable
+data class DailyStat(
+    val date: String,
+    val quizAnswered: Int = 0,
+    val quizCorrect: Int = 0,
+    val experiments: Int = 0,
+    val successes: Int = 0,
+    val explores: Int = 0,
+    val newElements: Int = 0,
+    val newMaterials: Int = 0
+) {
+    fun accuracy(): Int =
+        if (quizAnswered == 0) 0 else (quizCorrect * 100 / quizAnswered).coerceIn(0, 100)
+    fun activity(): Int = quizAnswered + experiments + explores
+    fun isEmpty(): Boolean = activity() == 0 && newElements == 0 && newMaterials == 0
+}
 
 @Serializable
 data class PlayerState(
@@ -180,8 +204,17 @@ data class PlayerState(
     val researchLeads: Set<String> = emptySet(),
     val notebook: List<ExperimentLog> = emptyList(),
     val daily: DailyProgress = DailyProgress(),
+    val history: List<DailyStat> = emptyList(),
+    val eventWeek: Long = -1,
+    val eventCount: Int = 0,
+    val eventClaimed: Boolean = false,
+    val clearedEvents: Int = 0,
     val reminderEnabled: Boolean = false,
     val reminderHour: Int = 20,
+    val soundOn: Boolean = true,
+    val hapticOn: Boolean = true,
+    val bgmOn: Boolean = false,
+    val tutorialDone: Boolean = false,
     val lastFailureIds: List<String> = emptyList()
 ) {
     val level: Int get() = 1 + exp / 100

@@ -33,9 +33,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.appathy.scienceroom.Feedback
 import com.appathy.scienceroom.Game
 import com.appathy.scienceroom.engine.ExploreOutcome
+import com.appathy.scienceroom.engine.EventEngine
 import com.appathy.scienceroom.engine.ExplorationEngine
+import com.appathy.scienceroom.engine.GameEvent
 
 @Composable
 fun WorldScreen(game: Game, onNavigate: (String) -> Unit) {
@@ -94,8 +97,23 @@ fun WorldScreen(game: Game, onNavigate: (String) -> Unit) {
                     Spacer(Modifier.height(8.dp))
                     if (unlocked) {
                         Button(onClick = {
-                            val o = ExplorationEngine.explore(content, game.state, loc)
-                            game.update { ExplorationEngine.applyOutcome(it, o) }
+                            val o = ExplorationEngine.explore(
+                                content, game.state, loc, game.event
+                            )
+                            game.update {
+                                var s2 = ExplorationEngine.applyOutcome(it, o)
+                                if (game.event.kind == GameEvent.Kind.EXPLORE &&
+                                    game.event.targetId == loc.id && o.foundMaterialId != null
+                                ) {
+                                    s2 = EventEngine.advance(s2, game.event, 1)
+                                }
+                                s2
+                            }
+                            game.feedback(
+                                if (o.isNew) Feedback.Kind.DISCOVER
+                                else if (o.foundMaterialId != null) Feedback.Kind.TAP
+                                else Feedback.Kind.FAIL
+                            )
                             outcome = o
                         }) { Text("探索する") }
                     } else {

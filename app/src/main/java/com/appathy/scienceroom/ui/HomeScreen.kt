@@ -22,9 +22,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.appathy.scienceroom.Game
+import com.appathy.scienceroom.engine.GameEvent
 import com.appathy.scienceroom.engine.MissionEngine
 import com.appathy.scienceroom.engine.PlanEngine
 import com.appathy.scienceroom.engine.PlanStyle
+import com.appathy.scienceroom.engine.ReviewEngine
 import com.appathy.scienceroom.engine.RecommendEngine
 
 @Composable
@@ -39,6 +41,7 @@ fun HomeScreen(game: Game, onNavigate: (String) -> Unit) {
     val goalTech = goalId?.let { content.techById[it] }
     val goalSteps = if (goalId == null) emptyList()
     else PlanEngine.plan(content, state, goalId, PlanStyle.SHORTEST).take(3)
+    val dueCount = ReviewEngine.dueCount(content, state, now)
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -126,6 +129,70 @@ fun HomeScreen(game: Game, onNavigate: (String) -> Unit) {
                         color = MaterialTheme.colorScheme.primary)
                     Spacer(Modifier.height(4.dp))
                     TextButton(onClick = { onNavigate("tech") }) { Text("技術ツリーを見る") }
+                }
+            }
+        }
+
+        item { SectionTitle("今週のできごと") }
+        item {
+            val ev = game.event
+            val done = state.eventCount.coerceAtMost(ev.goal)
+            PanelCard(modifier = Modifier.clickable {
+                onNavigate(
+                    when (ev.kind) {
+                        GameEvent.Kind.EXPLORE -> "world"
+                        GameEvent.Kind.STUDY -> "quiz"
+                        GameEvent.Kind.EXPERIMENT -> "lab"
+                    }
+                )
+            }) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(ev.title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        "あと " + game.eventDaysLeft + " 日",
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Text(
+                    ev.description,
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(8.dp))
+                LinearProgressIndicator(
+                    progress = { done.toFloat() / ev.goal },
+                    modifier = Modifier.fillMaxWidth().height(8.dp)
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    if (state.eventClaimed)
+                        "達成しました（経験値 +" + ev.rewardExp + "）"
+                    else done.toString() + " / " + ev.goal + "　達成で経験値 +" + ev.rewardExp,
+                    fontSize = 12.sp,
+                    color = if (state.eventClaimed) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
+
+        if (dueCount > 0) {
+            item {
+                PanelCard(modifier = Modifier.clickable { onNavigate("quiz") }) {
+                    Text(
+                        "復習どきの元素が " + dueCount + " 個",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        "忘れかけたころに解き直すと、いちばん記憶に残ります",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
         }

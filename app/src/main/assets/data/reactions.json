@@ -419,5 +419,127 @@
   "danger": 2,
   "simulationOnly": false,
   "exp": 30
+ },
+ {
+  "id": "r_zinc",
+  "name": "亜鉛を取り出す",
+  "inputs": [
+   "sphalerite",
+   "charcoal"
+  ],
+  "minTemp": 1000,
+  "maxTemp": 1300,
+  "minDuration": 4,
+  "equipment": "crucible",
+  "ratios": {
+   "sphalerite": 2,
+   "charcoal": 1
+  },
+  "product": "zinc",
+  "observation": "炉の口から白い煙が上がり、冷たい面に銀色の粉が付いた",
+  "explanation": "炭が鉱石から酸素を奪って亜鉛になるが、亜鉛の沸点は907℃と低いので、できたそばから蒸気になって逃げる。冷やして初めて金属として集まる",
+  "principle": "還元と蒸留の組み合わせ",
+  "changeType": "化学変化",
+  "danger": 4,
+  "simulationOnly": false,
+  "exp": 50
+ },
+ {
+  "id": "r_lead",
+  "name": "鉛を取り出す",
+  "inputs": [
+   "galena",
+   "charcoal"
+  ],
+  "minTemp": 800,
+  "maxTemp": 1100,
+  "minDuration": 3,
+  "equipment": "kiln",
+  "ratios": {
+   "galena": 2,
+   "charcoal": 1
+  },
+  "product": "lead",
+  "observation": "炉の底に、鈍く光る重い液がたまった",
+  "explanation": "炭が硫黄と酸素を引き受け、鉛が金属として分かれる。融点327℃と低いので液のまま流れ出す",
+  "principle": "炭素による還元",
+  "changeType": "化学変化",
+  "danger": 4,
+  "simulationOnly": false,
+  "exp": 45
+ },
+ {
+  "id": "r_brass",
+  "name": "真鍮を鋳る",
+  "inputs": [
+   "copper",
+   "zinc"
+  ],
+  "minTemp": 900,
+  "maxTemp": 1100,
+  "minDuration": 3,
+  "equipment": "crucible",
+  "ratios": {
+   "copper": 2,
+   "zinc": 1
+  },
+  "product": "brass",
+  "observation": "銅の赤みが消え、明るい黄金色の塊になった",
+  "explanation": "銅に亜鉛を混ぜると色が黄色みを帯び、硬さと音の響きが変わる。青銅より加工しやすい",
+  "principle": "合金化",
+  "changeType": "化学変化",
+  "danger": 3,
+  "simulationOnly": false,
+  "exp": 55
+ },
+ {
+  "id": "r_solder",
+  "name": "はんだをつくる",
+  "inputs": [
+   "tin",
+   "lead"
+  ],
+  "minTemp": 200,
+  "maxTemp": 400,
+  "minDuration": 2,
+  "equipment": "crucible",
+  "ratios": {
+   "tin": 3,
+   "lead": 2
+  },
+  "product": "solder",
+  "observation": "どちらの金属よりも低い温度で、二つが一緒にとけた",
+  "explanation": "金属を混ぜると、それぞれ単独より低い温度でとける割合がある。だから母材を傷めずに接合できる",
+  "principle": "共晶（混ぜると融点が下がる）",
+  "changeType": "化学変化",
+  "danger": 3,
+  "simulationOnly": false,
+  "exp": 50
+ },
+ {
+  "id": "r_cupel",
+  "name": "灰吹法で銀を分ける",
+  "inputs": [
+   "argentite",
+   "lead",
+   "quicklime"
+  ],
+  "minTemp": 900,
+  "maxTemp": 1100,
+  "minDuration": 5,
+  "equipment": "crucible",
+  "ratios": {
+   "argentite": 1,
+   "lead": 3,
+   "quicklime": 2
+  },
+  "product": "silver",
+  "observation": "鉛が灰に吸われて消え、器の中心に銀の粒だけが残った",
+  "explanation": "銀は鉛によく溶ける。まとめて溶かしたあと空気を送ると鉛だけが酸化して灰に染み込み、銀が取り残される。つくるのではなく、混ざったものから目的のものだけ取り出す技術",
+  "principle": "灰吹法（酸化による分離）",
+  "changeType": "化学変化",
+  "danger": 4,
+  "simulationOnly": false,
+  "exp": 70
  }
 ]

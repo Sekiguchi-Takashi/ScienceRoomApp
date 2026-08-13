@@ -43,7 +43,8 @@
    "limestone",
    "hematite",
    "malachite",
-   "cassiterite"
+   "cassiterite",
+   "sphalerite"
   ],
   "difficulty": 3,
   "danger": 2,
@@ -76,7 +77,10 @@
    "malachite",
    "rock_salt",
    "sulfur",
-   "hematite"
+   "hematite",
+   "sphalerite",
+   "galena",
+   "argentite"
   ],
   "difficulty": 4,
   "danger": 3,

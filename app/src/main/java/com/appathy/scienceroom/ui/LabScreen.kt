@@ -34,12 +34,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.appathy.scienceroom.Feedback
 import com.appathy.scienceroom.Game
 import com.appathy.scienceroom.data.ExperimentInput
 import com.appathy.scienceroom.data.ExperimentLog
 import com.appathy.scienceroom.data.ExperimentResult
 import com.appathy.scienceroom.data.Rank
 import com.appathy.scienceroom.engine.Equipment
+import com.appathy.scienceroom.engine.EventEngine
+import com.appathy.scienceroom.engine.GameEvent
 import com.appathy.scienceroom.engine.ExperimentEngine
 import com.appathy.scienceroom.engine.RatioEngine
 
@@ -245,9 +248,19 @@ private fun ExperimentPane(game: Game, input: LabInput) {
                         duration = input.duration.toInt(),
                         equipment = input.equipment
                     )
-                    val r = ExperimentEngine.run(content, game.state, payload)
-                    game.update { ExperimentEngine.applyResult(content, it, payload, r) }
+                    val r = ExperimentEngine.run(content, game.state, payload, game.event)
+                    game.update {
+                        var s2 = ExperimentEngine.applyResult(content, it, payload, r)
+                        if (game.event.kind == GameEvent.Kind.EXPERIMENT) {
+                            s2 = EventEngine.advance(s2, game.event, 1)
+                        }
+                        s2
+                    }
                     result = r
+                    game.feedback(
+                        if (r.rank == Rank.S || r.rank == Rank.A) Feedback.Kind.SUCCESS
+                        else Feedback.Kind.FAIL
+                    )
                     if (r.rank == Rank.S || r.rank == Rank.A) input.clear()
                 },
                 enabled = input.selected.isNotEmpty(),

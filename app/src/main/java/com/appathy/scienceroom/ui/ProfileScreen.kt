@@ -40,6 +40,7 @@ import com.appathy.scienceroom.data.PlayerRepo
 import com.appathy.scienceroom.engine.CivilizationEngine
 import com.appathy.scienceroom.engine.HintEngine
 import com.appathy.scienceroom.engine.LearningEngine
+import com.appathy.scienceroom.engine.MissionEngine
 import com.appathy.scienceroom.engine.SkillEngine
 import com.appathy.scienceroom.engine.TitleEngine
 
@@ -105,24 +106,56 @@ fun ProfileScreen(game: Game, onClose: () -> Unit) {
             }
         }
 
-        item { SectionTitle("称号") }
         item {
+            val titles = TitleEngine.all(content, state)
+            SectionTitle("称号　" + titles.count { it.achieved } + " / " + titles.size)
+        }
+        item {
+            val titles = TitleEngine.all(content, state)
             PanelCard {
-                TitleEngine.all(content, state).forEach { t ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 1.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
+                TitleEngine.categories.forEach { cat ->
+                    val group = titles.filter { it.category == cat }
+                    if (group.isNotEmpty()) {
                         Text(
-                            (if (t.achieved) "🏅 " else "・") + t.name,
-                            fontSize = 13.sp,
-                            fontWeight = if (t.achieved) FontWeight.Bold else FontWeight.Normal
+                            cat,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 6.dp, bottom = 2.dp)
                         )
-                        Text(
-                            t.condition,
-                            fontSize = 10.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        group.forEach { t ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 1.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    (if (t.achieved) "🏅 " else "・") + t.name,
+                                    fontSize = 13.sp,
+                                    fontWeight = if (t.achieved) FontWeight.Bold
+                                    else FontWeight.Normal,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                if (t.achieved) {
+                                    Text(
+                                        "達成",
+                                        fontSize = 10.sp,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                } else {
+                                    Text(
+                                        t.current.toString() + " / " + t.goal,
+                                        fontSize = 10.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                            if (!t.achieved) {
+                                LinearProgressIndicator(
+                                    progress = { t.ratio() },
+                                    modifier = Modifier.fillMaxWidth().height(3.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -198,7 +231,46 @@ fun ProfileScreen(game: Game, onClose: () -> Unit) {
             }
         }
 
-        item { SectionTitle("活動の記録") }
+        item { SectionTitle("この2週間の活動") }
+        item {
+            PanelCard {
+                ActivityChart(MissionEngine.series(state))
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    MissionEngine.weeklyComment(state),
+                    fontSize = 13.sp
+                )
+            }
+        }
+
+        item { SectionTitle("日ごとの記録") }
+        item {
+            PanelCard {
+                val recent = MissionEngine.series(state).reversed()
+                    .filter { !it.isEmpty() }.take(7)
+                if (recent.isEmpty()) {
+                    Text("まだ記録がありません", fontSize = 13.sp)
+                } else {
+                    recent.forEach { d ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(d.date, fontSize = 12.sp)
+                            Text(
+                                "クイズ" + d.quizAnswered +
+                                    "（" + d.accuracy() + "%）／実験" + d.experiments +
+                                    "／探索" + d.explores,
+                                fontSize = 11.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        item { SectionTitle("通算の記録") }
         item {
             PanelCard {
                 LabeledRow("探索した回数", state.exploreCount.toString())
@@ -220,6 +292,39 @@ fun ProfileScreen(game: Game, onClose: () -> Unit) {
                         else "${l.answered()}問・連続${l.streak}"
                     )
                 }
+            }
+        }
+
+        item { SectionTitle("音と振動") }
+        item {
+            PanelCard {
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    FilterChip(
+                        selected = state.soundOn,
+                        onClick = { game.update { s2 -> s2.copy(soundOn = !s2.soundOn) } },
+                        label = { Text(if (state.soundOn) "効果音オン" else "効果音オフ", fontSize = 11.sp) }
+                    )
+                    FilterChip(
+                        selected = state.hapticOn,
+                        onClick = { game.update { s2 -> s2.copy(hapticOn = !s2.hapticOn) } },
+                        label = { Text(if (state.hapticOn) "振動オン" else "振動オフ", fontSize = 11.sp) }
+                    )
+                    FilterChip(
+                        selected = state.bgmOn,
+                        onClick = { game.update { s2 -> s2.copy(bgmOn = !s2.bgmOn) } },
+                        label = { Text(if (state.bgmOn) "BGMオン" else "BGMオフ", fontSize = 11.sp) }
+                    )
+                }
+                Text(
+                    "BGMは音源ファイルを持たず、その場で組み立てた静かな音を鳴らします",
+                    fontSize = 10.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(6.dp))
+                TextButton(onClick = {
+                    game.update { s2 -> s2.copy(tutorialDone = false) }
+                    dataMessage = "次にアプリを開いたとき、遊び方をもう一度表示します"
+                }) { Text("遊び方をもう一度見る") }
             }
         }
 

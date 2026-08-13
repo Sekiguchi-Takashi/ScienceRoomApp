@@ -598,5 +598,145 @@
   "natural": false,
   "kind": "化合物",
   "note": "溶けていたものが残るので純度が上がる。物理変化だけで得られる"
+ },
+ {
+  "id": "sphalerite",
+  "name": "閃亜鉛鉱",
+  "imageId": "mat_sphalerite",
+  "composition": "ZnS",
+  "elements": [
+   "zn",
+   "s"
+  ],
+  "locations": [
+   "cave",
+   "mountain"
+  ],
+  "collection": "鉱脈の樹脂光沢を目印に掘る",
+  "processing": "砕いて選鉱する",
+  "rarity": 3,
+  "natural": true,
+  "kind": "化合物",
+  "note": "亜鉛の鉱石。硫黄と結びついている"
+ },
+ {
+  "id": "galena",
+  "name": "方鉛鉱",
+  "imageId": "mat_galena",
+  "composition": "PbS",
+  "elements": [
+   "pb",
+   "s"
+  ],
+  "locations": [
+   "cave"
+  ],
+  "collection": "立方体に割れる重い石を拾う",
+  "processing": "砕く",
+  "rarity": 3,
+  "natural": true,
+  "kind": "化合物",
+  "note": "鉛の鉱石。銀を少し含むことがある"
+ },
+ {
+  "id": "argentite",
+  "name": "輝銀鉱",
+  "imageId": "mat_argentite",
+  "composition": "Ag2S",
+  "elements": [
+   "ag",
+   "s"
+  ],
+  "locations": [
+   "cave"
+  ],
+  "collection": "黒い塊から伸びる銀の針を探す",
+  "processing": "砕いて選り分ける",
+  "rarity": 5,
+  "natural": true,
+  "kind": "化合物",
+  "note": "銀の鉱石。そのままでは銀を取り出しにくい"
+ },
+ {
+  "id": "zinc",
+  "name": "亜鉛",
+  "imageId": "elem_zn",
+  "composition": "Zn",
+  "elements": [
+   "zn"
+  ],
+  "locations": [],
+  "collection": "閃亜鉛鉱を炭とともに加熱し、蒸気を冷やして集める",
+  "processing": "鋳造する",
+  "rarity": 4,
+  "natural": false,
+  "kind": "単体",
+  "note": "沸点が低く、還元するとすぐ蒸気になる。冷やして初めて金属として手に入る"
+ },
+ {
+  "id": "lead",
+  "name": "鉛",
+  "imageId": "elem_pb",
+  "composition": "Pb",
+  "elements": [
+   "pb"
+  ],
+  "locations": [],
+  "collection": "方鉛鉱を炭とともに加熱して得る",
+  "processing": "低い温度でとけるので鋳やすい",
+  "rarity": 3,
+  "natural": false,
+  "kind": "単体",
+  "note": "重くてやわらかい。体に入ると害になるので扱いに注意する"
+ },
+ {
+  "id": "silver",
+  "name": "銀",
+  "imageId": "elem_ag",
+  "composition": "Ag",
+  "elements": [
+   "ag"
+  ],
+  "locations": [],
+  "collection": "灰吹法で鉛から分離して得る",
+  "processing": "叩いて器や飾りにする",
+  "rarity": 5,
+  "natural": false,
+  "kind": "単体",
+  "note": "電気と熱を最もよく通す金属。硫黄に触れると黒ずむ"
+ },
+ {
+  "id": "brass",
+  "name": "真鍮",
+  "imageId": "tech_brass",
+  "composition": "Cu + Zn",
+  "elements": [
+   "cu",
+   "zn"
+  ],
+  "locations": [],
+  "collection": "銅と亜鉛を融かして混ぜる",
+  "processing": "鋳る、磨く",
+  "rarity": 4,
+  "natural": false,
+  "kind": "混合物",
+  "note": "青銅より明るい黄金色。よく響くので鐘や楽器に使われる"
+ },
+ {
+  "id": "solder",
+  "name": "はんだ",
+  "imageId": "tech_solder",
+  "composition": "Sn + Pb",
+  "elements": [
+   "sn",
+   "pb"
+  ],
+  "locations": [],
+  "collection": "スズと鉛を融かして混ぜる",
+  "processing": "線に伸ばす",
+  "rarity": 3,
+  "natural": false,
+  "kind": "混合物",
+  "note": "どちらの金属より低い温度でとける。金属どうしをつなぐ"
  }
 ]

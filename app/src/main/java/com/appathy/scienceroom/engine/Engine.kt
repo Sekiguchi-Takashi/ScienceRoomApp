@@ -58,6 +58,93 @@ object Equipment {
     }
 }
 
+/** 週替わりのテーマ。サーバーを持たず、週番号から決まった内容を組み立てる */
+data class GameEvent(
+    val week: Long,
+    val kind: Kind,
+    val title: String,
+    val description: String,
+    val targetId: String,
+    val goal: Int,
+    val rewardExp: Int
+) {
+    enum class Kind { EXPLORE, STUDY, EXPERIMENT }
+}
+
+object EventEngine {
+
+    /** 1970-01-01 は木曜。月曜始まりにするため3日ずらす */
+    fun weekIndex(epochDay: Long): Long = (epochDay + 3) / 7
+
+    /** その週の残り日数。月曜なら7、日曜なら1 */
+    fun daysLeft(epochDay: Long): Int = (7 - ((epochDay + 3) % 7)).toInt()
+
+    private val studyTargets = listOf(
+        "非金属" to "気体と炎の週",
+        "遷移金属" to "金属をきわめる週",
+        "アルカリ金属" to "水に触れる金属の週",
+        "アルカリ土類金属" to "石と骨をつくる週",
+        "半金属" to "石英とガラスの週",
+        "ハロゲン" to "塩をつくる週"
+    )
+
+    fun current(content: Content, state: PlayerState, epochDay: Long): GameEvent {
+        val week = weekIndex(epochDay)
+        val rnd = Random(week)
+        // 行けない地域を指定しても参加できないので、解禁済みから選ぶ
+        val open = content.locations.filter { state.unlockedLocations.contains(it.id) }
+            .ifEmpty { content.locations }
+
+        return when (rnd.nextInt(3)) {
+            0 -> {
+                val loc = open[rnd.nextInt(open.size)]
+                GameEvent(
+                    week, GameEvent.Kind.EXPLORE,
+                    loc.name + "の当たり週",
+                    "今週は" + loc.name + "で素材が見つかりやすく、一度に多く採れます",
+                    loc.id, 10, 120
+                )
+            }
+            1 -> {
+                val pair = studyTargets[rnd.nextInt(studyTargets.size)]
+                GameEvent(
+                    week, GameEvent.Kind.STUDY,
+                    pair.second,
+                    "今週は" + pair.first + "が優先して出題され、正解の経験値が2倍になります",
+                    pair.first, 20, 120
+                )
+            }
+            else -> GameEvent(
+                week, GameEvent.Kind.EXPERIMENT,
+                "実験づくしの週",
+                "今週は実験で得られる経験値が5割増しになります。失敗しても増えます",
+                "", 12, 120
+            )
+        }
+    }
+
+    /** 週が変わっていれば進捗をリセットする */
+    fun rollover(state: PlayerState, week: Long): PlayerState {
+        if (state.eventWeek == week) return state
+        return state.copy(eventWeek = week, eventCount = 0, eventClaimed = false)
+    }
+
+    /** 目標達成した瞬間に一度だけ報酬を渡す */
+    fun advance(state: PlayerState, event: GameEvent, step: Int): PlayerState {
+        if (step <= 0) return state
+        val count = state.eventCount + step
+        var next = state.copy(eventCount = count)
+        if (!state.eventClaimed && count >= event.goal) {
+            next = next.copy(
+                eventClaimed = true,
+                clearedEvents = state.clearedEvents + 1,
+                exp = next.exp + event.rewardExp
+            )
+        }
+        return next
+    }
+}
+
 data class ExploreOutcome(
     val locationId: String,
     val foundMaterialId: String?,
@@ -68,7 +155,14 @@ data class ExploreOutcome(
 
 object ExplorationEngine {
 
-    fun explore(content: Content, state: PlayerState, location: GameLocation): ExploreOutcome {
+    fun explore(
+        content: Content,
+        state: PlayerState,
+        location: GameLocation,
+        event: GameEvent? = null
+    ): ExploreOutcome {
+        val boosted = event != null &&
+            event.kind == GameEvent.Kind.EXPLORE && event.targetId == location.id
         val seed = (state.exploreCount * 31 + location.id.hashCode()).toLong()
         val rnd = Random(seed)
 
@@ -83,7 +177,8 @@ object ExplorationEngine {
         val picked = content.materialById[pickedId]!!
 
         // 難易度が高い地域ほど空振りしやすい
-        val missChance = (location.difficulty - 1) * 8 + (picked.rarity - 1) * 6
+        var missChance = (location.difficulty - 1) * 8 + (picked.rarity - 1) * 6
+        if (boosted) missChance = (missChance - 20).coerceAtLeast(0)
         if (rnd.nextInt(100) < missChance) {
             return ExploreOutcome(
                 location.id, null, 0, false,
@@ -91,7 +186,8 @@ object ExplorationEngine {
             )
         }
 
-        val amount = 1 + rnd.nextInt(3 - (picked.rarity / 3).coerceAtMost(2))
+        val amount = 1 + rnd.nextInt(3 - (picked.rarity / 3).coerceAtMost(2)) +
+            if (boosted) 1 else 0
         val isNew = !state.discoveredMaterials.contains(picked.id)
         val message = if (isNew) "「${picked.name}」を初めて発見した" else "「${picked.name}」を採取した"
         return ExploreOutcome(location.id, picked.id, amount, isNew, message)
@@ -181,7 +277,13 @@ object ExperimentEngine {
     /** 判定ルールの版。ノートに残しておくと、後でルールが変わっても結果を読み解ける */
     const val RULE_VERSION = "1"
 
-    fun run(content: Content, state: PlayerState, input: ExperimentInput): ExperimentResult {
+    fun run(
+        content: Content,
+        state: PlayerState,
+        input: ExperimentInput,
+        event: GameEvent? = null
+    ): ExperimentResult {
+        val expBoost = event != null && event.kind == GameEvent.Kind.EXPERIMENT
         val selected = input.materials.sorted()
 
         if (selected.isEmpty()) {
@@ -268,7 +370,8 @@ object ExperimentEngine {
             val precise = abs(input.temperature - center) <= span / 4 &&
                 input.duration >= exact.minDuration + 1
             val rank = if (precise) Rank.S else Rank.A
-            val gained = exact.exp + if (rank == Rank.S) 10 else 0
+            val baseGain = exact.exp + if (rank == Rank.S) 10 else 0
+            val gained = if (expBoost) baseGain * 3 / 2 else baseGain
             val known = mutableListOf<String>()
             if (!state.discoveredReactions.contains(exact.id)) known.add("新しい反応「${exact.name}」を記録した")
             val product = content.materialById[exact.product]
@@ -296,7 +399,8 @@ object ExperimentEngine {
             rank, exact, null, title, observation,
             "材料の組み合わせは合っている。足りないのは条件のほうだ",
             exact.principle, causes, hint,
-            if (rank == Rank.B) 8 else 4, emptyList(), null
+            if (expBoost) (if (rank == Rank.B) 12 else 6) else (if (rank == Rank.B) 8 else 4),
+            emptyList(), null
         )
     }
 
@@ -458,16 +562,29 @@ object LearningEngine {
         30L * 24 * 60 * 60 * 1000
     )
 
-    fun nextQuestion(content: Content, state: PlayerState, mode: QuizMode?, now: Long): Question {
+    fun nextQuestion(
+        content: Content,
+        state: PlayerState,
+        mode: QuizMode?,
+        now: Long,
+        dueOnly: Boolean = false,
+        event: GameEvent? = null
+    ): Question {
+        val focus = if (event != null && event.kind == GameEvent.Kind.STUDY) event.targetId else null
         val chosenMode = mode ?: QuizMode.entries.random()
-        val pool = content.elements
+        val due = content.elements.filter { e ->
+            val l = state.learning[e.id]
+            l != null && l.nextReview in 1..now
+        }
+        val pool = if (dueOnly && due.size >= 4) due else content.elements
         val target = pool.maxByOrNull { e ->
             val l = state.learning[e.id]
             val risk = l?.forgettingRisk(now) ?: 1.0
-            risk + Random.nextDouble() * 0.25
+            val bonus = if (focus != null && e.category == focus) 0.5 else 0.0
+            risk + bonus + Random.nextDouble() * 0.25
         } ?: pool.first()
 
-        val distractors = pool.filter { it.id != target.id }.shuffled().take(3)
+        val distractors = content.elements.filter { it.id != target.id }.shuffled().take(3)
         return when (chosenMode) {
             QuizMode.SYMBOL_TO_NAME -> Question(
                 chosenMode, target, target.symbol, false,
@@ -488,7 +605,15 @@ object LearningEngine {
         }
     }
 
-    fun answer(state: PlayerState, q: Question, correct: Boolean, now: Long): PlayerState {
+    fun answer(
+        state: PlayerState,
+        q: Question,
+        correct: Boolean,
+        now: Long,
+        event: GameEvent? = null
+    ): PlayerState {
+        val doubled = event != null && event.kind == GameEvent.Kind.STUDY &&
+            q.element.category == event.targetId
         val prev = state.learning[q.element.id] ?: com.appathy.scienceroom.data.ElementLearning()
         val mode = q.mode.id
         val correctMap = prev.correct.toMutableMap()
@@ -497,11 +622,13 @@ object LearningEngine {
         if (correct) correctMap[mode] = (correctMap[mode] ?: 0) + 1
 
         val streak = if (correct) (prev.streak + 1).coerceAtMost(intervals.size - 1) else 0
+        // 間違えたものは数分後にもう一度。正解なら段階に応じて先へ送る
+        val wait = if (correct) intervals[streak] else 3L * 60 * 1000
         val updated = prev.copy(
             correct = correctMap,
             total = totalMap,
             lastReviewed = now,
-            nextReview = now + intervals[streak],
+            nextReview = now + wait,
             streak = streak
         )
         val learning = state.learning.toMutableMap()
@@ -512,7 +639,7 @@ object LearningEngine {
             quizCount = state.quizCount + 1,
             quizCorrect = state.quizCorrect + if (correct) 1 else 0,
             knownElements = if (correct) state.knownElements + q.element.id else state.knownElements,
-            exp = state.exp + if (correct) 5 else 1
+            exp = state.exp + if (correct) (if (doubled) 10 else 5) else 1
         )
     }
 
@@ -635,6 +762,7 @@ object CivilizationEngine {
         "窯業" to listOf("kiln", "pottery", "lime", "plaster", "masonry", "glaze", "porcelain"),
         "金属" to listOf("crucible", "bellows", "bronze", "iron", "casting", "forging", "steel"),
         "ガラス・光学" to listOf("glass", "glassware", "lens", "microscope", "telescope"),
+        "合金・分離" to listOf("zinc", "lead", "brass", "solder", "cupellation"),
         "化学" to listOf("fire", "charcoal", "salt", "lye", "distillation")
     )
 
@@ -722,30 +850,73 @@ object RecommendEngine {
         TechnologyEngine.all(content, state).firstOrNull { !it.completed && it.unlocked }
 }
 
-data class Title(val name: String, val condition: String, val achieved: Boolean)
+data class Title(
+    val name: String,
+    val condition: String,
+    val category: String,
+    val current: Int,
+    val goal: Int
+) {
+    val achieved: Boolean get() = current >= goal
+    fun ratio(): Float = (current.toFloat() / goal).coerceIn(0f, 1f)
+}
 
 object TitleEngine {
 
+    val categories = listOf("学習", "探索", "実験", "技術", "続ける")
+
     fun all(content: Content, state: PlayerState): List<Title> {
         val sRank = state.notebook.count { it.rank == "S" }
+        val activeDays = state.history.count { !it.isEmpty() }
+        val principles = state.discoveredReactions
+            .mapNotNull { content.reactionById[it]?.principle }.distinct().size
+        val physical = state.discoveredReactions
+            .count { content.reactionById[it]?.changeType == "物理変化" }
+
         return listOf(
-            Title("火をつかう者", "火起こしを完成させる", state.completedTech.contains("fire")),
-            Title("手を動かす人", "実験を10回行う", state.experimentCount >= 10),
-            Title("失敗を数えた人", "失敗を5回記録する", state.failCount >= 5),
-            Title("精度の人", "S判定を1回出す", sRank >= 1),
-            Title("反応の記録者", "反応を10件記録する", state.discoveredReactions.size >= 10),
-            Title("寄り道の名手", "研究候補を3件見つける", state.researchLeads.size >= 3),
-            Title("元素をそらんじる人", "全元素を覚える",
-                state.knownElements.size >= content.elements.size),
-            Title("採集の達人", "素材を20種見つける", state.discoveredMaterials.size >= 20),
-            Title("金属の民", "製鉄を完成させる", state.completedTech.contains("iron")),
-            Title("文明の設計者", "技術をすべて完成させる",
-                state.completedTech.size >= content.technologies.size)
+            Title("元素をひとつ覚えた", "元素を1つ覚える", "学習", state.knownElements.size, 1),
+            Title("十を数える", "元素を10覚える", "学習", state.knownElements.size, 10),
+            Title("元素をそらんじる人", "全元素を覚える", "学習",
+                state.knownElements.size, content.elements.size),
+            Title("問いに慣れた人", "クイズに100問答える", "学習", state.quizCount, 100),
+
+            Title("外へ出た人", "探索を1回する", "探索", state.exploreCount, 1),
+            Title("採集の達人", "素材を20種見つける", "探索", state.discoveredMaterials.size, 20),
+            Title("すべてを見た人", "全素材を見つける", "探索",
+                state.discoveredMaterials.size, content.materials.size),
+            Title("地の果てまで", "地域を8つ解禁する", "探索", state.unlockedLocations.size, 8),
+
+            Title("手を動かす人", "実験を10回行う", "実験", state.experimentCount, 10),
+            Title("失敗を数えた人", "失敗を5回記録する", "実験", state.failCount, 5),
+            Title("精度の人", "S判定を1回出す", "実験", sRank, 1),
+            Title("反応の記録者", "反応を10件記録する", "実験",
+                state.discoveredReactions.size, 10),
+            Title("寄り道の名手", "研究候補を3件見つける", "実験", state.researchLeads.size, 3),
+            Title("原理を並べる人", "5種類の科学原理に触れる", "実験", principles, 5),
+            Title("変化を見分ける人", "物理変化の反応を3件記録する", "実験", physical, 3),
+
+            Title("火をつかう者", "火起こしを完成させる", "技術",
+                if (state.completedTech.contains("fire")) 1 else 0, 1),
+            Title("焼き物の民", "土器を完成させる", "技術",
+                if (state.completedTech.contains("pottery")) 1 else 0, 1),
+            Title("金属の民", "製鉄を完成させる", "技術",
+                if (state.completedTech.contains("iron")) 1 else 0, 1),
+            Title("光を曲げる人", "レンズを完成させる", "技術",
+                if (state.completedTech.contains("lens")) 1 else 0, 1),
+            Title("文明の設計者", "技術をすべて完成させる", "技術",
+                state.completedTech.size, content.technologies.size),
+
+            Title("週の常連", "週替わりの目標を3回達成する", "続ける", state.clearedEvents, 3),
+            Title("三日坊主をこえた", "4日以上活動する", "続ける", activeDays, 4),
+            Title("ひと月の人", "20日以上活動する", "続ける", activeDays, 20)
         )
     }
 
     fun current(content: Content, state: PlayerState): String =
         all(content, state).lastOrNull { it.achieved }?.name ?: "見習い"
+
+    fun achievedCount(content: Content, state: PlayerState): Int =
+        all(content, state).count { it.achieved }
 }
 
 data class Skill(val name: String, val value: Int, val note: String)
@@ -829,17 +1000,104 @@ object MissionEngine {
         )
     }
 
-    /** 日付が変わっていれば基準値を今の値で置き直す */
+    /** 日付が変わっていれば前日分を履歴に確定し、基準値を今の値で置き直す */
     fun rollover(state: PlayerState, today: String): PlayerState {
-        if (state.daily.date == today) return state
+        val prev = state.daily
+        if (prev.date == today) return state
+
+        val history = state.history.toMutableList()
+        if (prev.date.isNotEmpty()) {
+            val stat = com.appathy.scienceroom.data.DailyStat(
+                date = prev.date,
+                quizAnswered = (state.quizCount - prev.quizCountBase).coerceAtLeast(0),
+                quizCorrect = (state.quizCorrect - prev.quizCorrectBase).coerceAtLeast(0),
+                experiments = (state.experimentCount - prev.experimentBase).coerceAtLeast(0),
+                successes = (state.successCount - prev.successBase).coerceAtLeast(0),
+                explores = (state.exploreCount - prev.exploreBase).coerceAtLeast(0),
+                newElements = (state.knownElements.size - prev.knownElementsBase)
+                    .coerceAtLeast(0),
+                newMaterials = (state.discoveredMaterials.size - prev.materialsBase)
+                    .coerceAtLeast(0)
+            )
+            if (!stat.isEmpty()) history.add(stat)
+        }
+
         return state.copy(
+            history = history.takeLast(60),
             daily = com.appathy.scienceroom.data.DailyProgress(
                 date = today,
                 quizCorrectBase = state.quizCorrect,
+                quizCountBase = state.quizCount,
                 exploreBase = state.exploreCount,
-                experimentBase = state.experimentCount
+                experimentBase = state.experimentCount,
+                successBase = state.successCount,
+                knownElementsBase = state.knownElements.size,
+                materialsBase = state.discoveredMaterials.size
             )
         )
+    }
+
+    /** 今日の途中経過も含めた並び。グラフの右端を今日にする */
+    fun series(state: PlayerState): List<com.appathy.scienceroom.data.DailyStat> {
+        val today = com.appathy.scienceroom.data.DailyStat(
+            date = state.daily.date,
+            quizAnswered = (state.quizCount - state.daily.quizCountBase).coerceAtLeast(0),
+            quizCorrect = (state.quizCorrect - state.daily.quizCorrectBase).coerceAtLeast(0),
+            experiments = (state.experimentCount - state.daily.experimentBase).coerceAtLeast(0),
+            successes = (state.successCount - state.daily.successBase).coerceAtLeast(0),
+            explores = (state.exploreCount - state.daily.exploreBase).coerceAtLeast(0),
+            newElements = (state.knownElements.size - state.daily.knownElementsBase)
+                .coerceAtLeast(0),
+            newMaterials = (state.discoveredMaterials.size - state.daily.materialsBase)
+                .coerceAtLeast(0)
+        )
+        return state.history + today
+    }
+
+    /** 直近7日のふりかえり文 */
+    fun weeklyComment(state: PlayerState): String {
+        val week = series(state).takeLast(7)
+        val active = week.count { !it.isEmpty() }
+        val answered = week.sumOf { it.quizAnswered }
+        val correct = week.sumOf { it.quizCorrect }
+        val experiments = week.sumOf { it.experiments }
+        val acc = if (answered == 0) 0 else correct * 100 / answered
+
+        if (active == 0) return "この1週間は記録がありません。1日5問でも続けると定着します"
+        val head = "この1週間は " + active + " 日活動し、クイズ " + answered +
+            "問・実験 " + experiments + "回でした。"
+        val tail = when {
+            answered == 0 -> "実験は進んでいます。元素も少しずつ覚えると技術が早く開きます"
+            acc >= 80 -> "正答率 " + acc + "% は十分です。新しい出題形式に広げてみましょう"
+            acc >= 50 -> "正答率 " + acc + "% です。間違えたものだけ復習すると伸びます"
+            else -> "正答率 " + acc + "% です。一度に多くより、少ない数を繰り返すほうが早く覚えられます"
+        }
+        return head + tail
+    }
+}
+
+/** クイズ1回分の成績。終わったときにまとめて振り返る */
+data class QuizSession(
+    val answered: Int = 0,
+    val correct: Int = 0,
+    val bestStreak: Int = 0,
+    val missed: List<String> = emptyList()
+) {
+    fun record(elementId: String, isCorrect: Boolean, streak: Int): QuizSession = copy(
+        answered = answered + 1,
+        correct = correct + if (isCorrect) 1 else 0,
+        bestStreak = maxOf(bestStreak, streak),
+        missed = if (isCorrect) missed else (missed + elementId).distinct()
+    )
+
+    fun accuracy(): Int = if (answered == 0) 0 else correct * 100 / answered
+
+    fun comment(): String = when {
+        answered == 0 -> ""
+        accuracy() >= 90 -> "ほとんど迷わず答えられている。次は別の出題形式にも広げてみよう"
+        accuracy() >= 70 -> "だいぶ身についてきた。間違えたものだけ復習すると効率がよい"
+        accuracy() >= 40 -> "半分ほど。図鑑で性質と使われ方を読んでから戻ると覚えやすい"
+        else -> "まだ出会って間もない元素が多い。少ない数を繰り返すほうが早く覚えられる"
     }
 }
 

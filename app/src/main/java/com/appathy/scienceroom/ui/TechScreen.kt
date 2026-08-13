@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.appathy.scienceroom.Feedback
 import com.appathy.scienceroom.Game
 import com.appathy.scienceroom.engine.PlanEngine
 import com.appathy.scienceroom.engine.PlanStyle
@@ -130,6 +131,7 @@ fun TechScreen(game: Game, onNavigate: (String) -> Unit) {
                         Button(
                             onClick = {
                                 game.update { TechnologyEngine.complete(content, it, st.tech) }
+                                game.feedback(Feedback.Kind.UNLOCK)
                                 completedName = st.tech.name
                             },
                             enabled = st.ready

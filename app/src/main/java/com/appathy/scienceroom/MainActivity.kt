@@ -1,5 +1,6 @@
 package com.appathy.scienceroom
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import android.content.Context
@@ -24,6 +25,8 @@ import androidx.compose.ui.unit.sp
 import com.appathy.scienceroom.data.Content
 import com.appathy.scienceroom.data.PlayerRepo
 import com.appathy.scienceroom.data.PlayerState
+import com.appathy.scienceroom.engine.EventEngine
+import com.appathy.scienceroom.engine.GameEvent
 import com.appathy.scienceroom.engine.MissionEngine
 import com.appathy.scienceroom.ui.EncyclopediaScreen
 import com.appathy.scienceroom.ui.HomeScreen
@@ -31,6 +34,7 @@ import com.appathy.scienceroom.ui.LabScreen
 import com.appathy.scienceroom.ui.ProfileScreen
 import com.appathy.scienceroom.ui.QuizScreen
 import com.appathy.scienceroom.ui.ScienceRoomTheme
+import com.appathy.scienceroom.ui.TutorialScreen
 import com.appathy.scienceroom.ui.TechScreen
 import com.appathy.scienceroom.ui.WorldScreen
 
@@ -41,20 +45,34 @@ class Game(private val ctx: Context) {
     var state by mutableStateOf(PlayerRepo.load(ctx))
         private set
 
+    /** 今週のイベント。週が変わればアプリ起動時に入れ替わる */
+    val event: GameEvent
+
     init {
-        val today = java.time.LocalDate.now().toString()
-        val rolled = MissionEngine.rollover(state, today)
-        if (rolled !== state) {
-            state = rolled
-            PlayerRepo.save(ctx, rolled)
+        val date = java.time.LocalDate.now()
+        val epochDay = date.toEpochDay()
+        event = EventEngine.current(content, state, epochDay)
+
+        var next = MissionEngine.rollover(state, date.toString())
+        next = EventEngine.rollover(next, event.week)
+        if (next !== state) {
+            state = next
+            PlayerRepo.save(ctx, next)
         }
         ReviewReminder.sync(ctx)
     }
+
+    val eventDaysLeft: Int
+        get() = EventEngine.daysLeft(java.time.LocalDate.now().toEpochDay())
 
     fun update(transform: (PlayerState) -> PlayerState) {
         val next = transform(state)
         state = next
         PlayerRepo.save(ctx, next)
+    }
+
+    fun feedback(kind: Feedback.Kind) {
+        Feedback.play(ctx, kind, state.soundOn, state.hapticOn)
     }
 
     fun replace(next: PlayerState) {
@@ -69,6 +87,18 @@ class Game(private val ctx: Context) {
 }
 
 class MainActivity : ComponentActivity() {
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Feedback.release()
+        Bgm.stop()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Bgm.stop()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -100,6 +130,16 @@ fun AppRoot() {
     val game = remember { Game(ctx) }
     var route by remember { mutableStateOf("home") }
     var overlay by remember { mutableStateOf<String?>(null) }
+    var showTutorial by remember { mutableStateOf(!game.state.tutorialDone) }
+
+    LaunchedEffect(game.state.bgmOn) {
+        if (game.state.bgmOn) Bgm.start() else Bgm.stop()
+    }
+
+    if (showTutorial) {
+        TutorialScreen(game) { showTutorial = false }
+        return
+    }
 
     val navigate: (String) -> Unit = { target ->
         if (target == "quiz" || target == "profile") overlay = target

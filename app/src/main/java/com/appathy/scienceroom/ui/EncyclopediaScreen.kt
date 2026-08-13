@@ -1,5 +1,8 @@
 package com.appathy.scienceroom.ui
 
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.FilterChip
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.clickable
@@ -33,11 +36,16 @@ import com.appathy.scienceroom.Game
 import com.appathy.scienceroom.data.Element
 import com.appathy.scienceroom.data.GameMaterial
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EncyclopediaScreen(game: Game, onNavigate: (String) -> Unit) {
     var tab by remember { mutableStateOf(0) }
     var element by remember { mutableStateOf<Element?>(null) }
     var material by remember { mutableStateOf<GameMaterial?>(null) }
+    var table by remember { mutableStateOf(false) }
+    var query by remember { mutableStateOf("") }
+    var elementSort by remember { mutableStateOf("number") }
+    var materialSort by remember { mutableStateOf("name") }
 
     val content = game.content
     val state = game.state
@@ -69,8 +77,60 @@ fun EncyclopediaScreen(game: Game, onNavigate: (String) -> Unit) {
                             )
                             Button(onClick = { onNavigate("quiz") }) { Text("クイズを解く") }
                         }
+                        Spacer(Modifier.height(6.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            FilterChip(
+                                selected = !table,
+                                onClick = { table = false },
+                                label = { Text("一覧", fontSize = 11.sp) }
+                            )
+                            FilterChip(
+                                selected = table,
+                                onClick = { table = true },
+                                label = { Text("周期表", fontSize = 11.sp) }
+                            )
+                        }
                     }
-                    items(content.elements) { e ->
+
+                    if (table) {
+                        item {
+                            PanelCard {
+                                PeriodicTable(
+                                    elements = content.elements,
+                                    known = state.knownElements
+                                ) { e -> if (state.knownElements.contains(e.id)) element = e }
+                            }
+                        }
+                    } else {
+                    item {
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            listOf(
+                                "number" to "原子番号",
+                                "category" to "分類",
+                                "known" to "未習得から"
+                            ).forEach { (key, label) ->
+                                FilterChip(
+                                    selected = elementSort == key,
+                                    onClick = { elementSort = key },
+                                    label = { Text(label, fontSize = 10.sp) }
+                                )
+                            }
+                        }
+                    }
+                    items(
+                        when (elementSort) {
+                            "category" -> content.elements.sortedWith(
+                                compareBy({ it.category }, { it.atomicNumber })
+                            )
+                            "known" -> content.elements.sortedWith(
+                                compareBy(
+                                    { state.knownElements.contains(it.id) },
+                                    { it.atomicNumber }
+                                )
+                            )
+                            else -> content.elements.sortedBy { it.atomicNumber }
+                        }
+                    ) { e ->
                         val known = state.knownElements.contains(e.id)
                         PanelCard(modifier = Modifier.clickable { if (known) element = e }) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -92,6 +152,7 @@ fun EncyclopediaScreen(game: Game, onNavigate: (String) -> Unit) {
                             }
                         }
                     }
+                    }
                 }
 
                 1 -> {
@@ -100,8 +161,47 @@ fun EncyclopediaScreen(game: Game, onNavigate: (String) -> Unit) {
                             "見つけた素材 ${state.discoveredMaterials.size} / ${content.materials.size}",
                             fontSize = 14.sp
                         )
+                        Spacer(Modifier.height(6.dp))
+                        OutlinedTextField(
+                            value = query,
+                            onValueChange = { query = it },
+                            label = { Text("名前や組成でしぼる", fontSize = 12.sp) },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            listOf(
+                                "name" to "名前",
+                                "rarity" to "希少度",
+                                "kind" to "区分",
+                                "owned" to "所持数"
+                            ).forEach { (key, label) ->
+                                FilterChip(
+                                    selected = materialSort == key,
+                                    onClick = { materialSort = key },
+                                    label = { Text(label, fontSize = 10.sp) }
+                                )
+                            }
+                        }
                     }
-                    items(content.materials) { m ->
+                    items(
+                        content.materials.filter {
+                            query.isEmpty() || it.name.contains(query) ||
+                                it.composition.contains(query, ignoreCase = true)
+                        }.let { list ->
+                            when (materialSort) {
+                                "rarity" -> list.sortedByDescending { it.rarity }
+                                "kind" -> list.sortedWith(
+                                    compareBy({ it.kind }, { it.name })
+                                )
+                                "owned" -> list.sortedByDescending {
+                                    state.inventory[it.id] ?: 0
+                                }
+                                else -> list
+                            }
+                        }
+                    ) { m ->
                         val found = state.discoveredMaterials.contains(m.id)
                         PanelCard(modifier = Modifier.clickable { if (found) material = m }) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -226,6 +326,9 @@ fun EncyclopediaScreen(game: Game, onNavigate: (String) -> Unit) {
                     LabeledRow("英語名", e.english)
                     LabeledRow("原子番号", e.atomicNumber.toString())
                     LabeledRow("分類", e.category)
+                    if (e.group > 0) {
+                        LabeledRow("周期表の位置", "第" + e.period + "周期・" + e.group + "族")
+                    }
                     LabeledRow("常温での状態", e.state)
                     LabeledRow("融点", e.melting?.let { "$it ℃" } ?: "—")
                     LabeledRow("沸点", e.boiling?.let { "$it ℃" } ?: "—")
@@ -234,10 +337,13 @@ fun EncyclopediaScreen(game: Game, onNavigate: (String) -> Unit) {
                     Text(e.property, fontSize = 14.sp)
                     Spacer(Modifier.height(6.dp))
                     Text("使われ方：${e.uses}", fontSize = 13.sp)
-                    Text(
-                        "関連素材：" + e.materials.joinToString("、") { game.content.materialName(it) },
-                        fontSize = 13.sp
-                    )
+                    if (e.materials.isNotEmpty()) {
+                        Text(
+                            "関連素材：" +
+                                e.materials.joinToString("、") { game.content.materialName(it) },
+                            fontSize = 13.sp
+                        )
+                    }
                 }
             },
             confirmButton = { TextButton(onClick = { element = null }) { Text("閉じる") } }
