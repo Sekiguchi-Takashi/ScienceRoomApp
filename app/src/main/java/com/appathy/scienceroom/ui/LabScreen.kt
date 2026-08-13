@@ -268,6 +268,37 @@ private fun ExperimentPane(game: Game, input: LabInput) {
             ) { Text("実験開始") }
         }
 
+        if (state.favorites.isNotEmpty()) {
+            item { SectionTitle("覚えておいた手順") }
+            item {
+                PanelCard {
+                    state.favorites.reversed().forEach { fav ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    fav.materials.joinToString("＋") {
+                                        content.materialName(it) + "×" + (fav.quantities[it] ?: 1)
+                                    },
+                                    fontSize = 13.sp
+                                )
+                                Text(
+                                    fav.temperature.toString() + "℃／時間" + fav.duration +
+                                        "／" + Equipment.label(fav.equipment),
+                                    fontSize = 11.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            TextButton(onClick = { input.restore(fav) }) { Text("読み込む") }
+                        }
+                    }
+                }
+            }
+        }
+
         item { SectionTitle("研究候補（偶然の発見）") }
         item {
             PanelCard {
@@ -441,7 +472,29 @@ private fun NotebookPane(game: Game, onReplay: (ExperimentLog) -> Unit) {
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    TextButton(onClick = { onReplay(log) }) { Text("この条件を読み込む") }
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        TextButton(onClick = { onReplay(log) }) { Text("読み込む") }
+                        val saved = state.favorites.any {
+                            it.materials == log.materials &&
+                                it.temperature == log.temperature &&
+                                it.duration == log.duration &&
+                                it.equipment == log.equipment
+                        }
+                        TextButton(onClick = {
+                            game.update { s2 ->
+                                if (saved) {
+                                    s2.copy(favorites = s2.favorites.filterNot {
+                                        it.materials == log.materials &&
+                                            it.temperature == log.temperature &&
+                                            it.duration == log.duration &&
+                                            it.equipment == log.equipment
+                                    })
+                                } else {
+                                    s2.copy(favorites = (s2.favorites + log).takeLast(10))
+                                }
+                            }
+                        }) { Text(if (saved) "★ 登録済み" else "☆ 覚えておく") }
+                    }
                 }
             }
         }

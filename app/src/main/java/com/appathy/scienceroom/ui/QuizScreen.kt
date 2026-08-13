@@ -40,6 +40,7 @@ import com.appathy.scienceroom.engine.GameEvent
 import com.appathy.scienceroom.engine.LearningEngine
 import com.appathy.scienceroom.engine.Question
 import com.appathy.scienceroom.engine.QuizMode
+import com.appathy.scienceroom.engine.QuizScope
 import com.appathy.scienceroom.engine.QuizSession
 import com.appathy.scienceroom.engine.ReviewEngine
 
@@ -54,6 +55,7 @@ fun QuizScreen(game: Game, onClose: () -> Unit) {
     val dueAtStart = remember { ReviewEngine.dueCount(content, game.state, now) }
 
     var mode by remember { mutableStateOf<QuizMode?>(null) }
+    var scope by remember { mutableStateOf(QuizScope.ALL) }
     var dueOnly by remember { mutableStateOf(false) }
     var session by remember { mutableStateOf(QuizSession()) }
     var streak by remember { mutableStateOf(0) }
@@ -68,7 +70,7 @@ fun QuizScreen(game: Game, onClose: () -> Unit) {
     fun draw() {
         picked = null
         question = LearningEngine.nextQuestion(
-            content, game.state, mode, System.currentTimeMillis(), dueOnly, game.event
+            content, game.state, mode, System.currentTimeMillis(), dueOnly, game.event, scope
         )
     }
 
@@ -130,6 +132,16 @@ fun QuizScreen(game: Game, onClose: () -> Unit) {
         }
 
         item {
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                items(QuizScope.entries.toList()) { sc ->
+                    FilterChip(
+                        selected = scope == sc,
+                        onClick = { scope = sc; draw() },
+                        label = { Text(sc.label, fontSize = 11.sp) }
+                    )
+                }
+            }
+            Spacer(Modifier.height(4.dp))
             LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 item {
                     FilterChip(

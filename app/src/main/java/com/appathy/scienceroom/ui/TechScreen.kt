@@ -43,11 +43,18 @@ fun TechScreen(game: Game, onNavigate: (String) -> Unit) {
     val state = game.state
     val statuses = TechnologyEngine.all(content, state)
     val tierMap = RoadmapEngine.tiers(content)
-    val grouped = statuses.groupBy { tierMap[it.tech.id] ?: 0 }
+    val filtered = when (filter) {
+        "ready" -> statuses.filter { it.ready }
+        "open" -> statuses.filter { !it.completed && it.unlocked }
+        "done" -> statuses.filter { it.completed }
+        else -> statuses
+    }
+    val grouped = filtered.groupBy { tierMap[it.tech.id] ?: 0 }
     val tierKeys = grouped.keys.sorted()
     var completedName by remember { mutableStateOf<String?>(null) }
     var planFor by remember { mutableStateOf<String?>(null) }
     var planStyle by remember { mutableStateOf(PlanStyle.SHORTEST) }
+    var filter by remember { mutableStateOf("all") }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -60,6 +67,27 @@ fun TechScreen(game: Game, onNavigate: (String) -> Unit) {
                 "技術は一本道ではなく分岐します。段が進むほど前提が増えます",
                 fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            Spacer(Modifier.height(6.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                listOf(
+                    "all" to "すべて " + statuses.size,
+                    "ready" to "研究可能 " + statuses.count { it.ready },
+                    "open" to "着手中",
+                    "done" to "完成 " + statuses.count { it.completed }
+                ).forEach { (key, label) ->
+                    FilterChip(
+                        selected = filter == key,
+                        onClick = { filter = key },
+                        label = { Text(label, fontSize = 10.sp) }
+                    )
+                }
+            }
+        }
+
+        if (filtered.isEmpty()) {
+            item {
+                PanelCard { Text("この条件に当てはまる技術はありません", fontSize = 14.sp) }
+            }
         }
 
         for (tier in tierKeys) {

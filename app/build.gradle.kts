@@ -13,8 +13,8 @@ android {
         applicationId = "com.appathy.scienceroom"
         minSdk = 26
         targetSdk = 34
-        versionCode = 19
-        versionName = "2.8"
+        versionCode = 21
+        versionName = "3.0"
     }
 
     signingConfigs {

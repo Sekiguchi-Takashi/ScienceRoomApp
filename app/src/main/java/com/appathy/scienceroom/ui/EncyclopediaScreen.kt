@@ -1,5 +1,6 @@
 package com.appathy.scienceroom.ui
 
+import com.appathy.scienceroom.engine.LinkEngine
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.FilterChip
@@ -337,10 +338,18 @@ fun EncyclopediaScreen(game: Game, onNavigate: (String) -> Unit) {
                     Text(e.property, fontSize = 14.sp)
                     Spacer(Modifier.height(6.dp))
                     Text("使われ方：${e.uses}", fontSize = 13.sp)
-                    if (e.materials.isNotEmpty()) {
+                    val holders = LinkEngine.materialsOf(content, e.id)
+                    if (holders.isNotEmpty()) {
+                        Spacer(Modifier.height(6.dp))
                         Text(
-                            "関連素材：" +
-                                e.materials.joinToString("、") { game.content.materialName(it) },
+                            "この元素を含む素材：" + holders.joinToString("、") { it.name },
+                            fontSize = 13.sp
+                        )
+                    }
+                    val techs = LinkEngine.techOf(content, e.id)
+                    if (techs.isNotEmpty()) {
+                        Text(
+                            "この知識が要る技術：" + techs.joinToString("、") { it.name },
                             fontSize = 13.sp
                         )
                     }
@@ -374,14 +383,53 @@ fun EncyclopediaScreen(game: Game, onNavigate: (String) -> Unit) {
                         "関連元素：" + m.elements.joinToString("、") { game.content.elementName(it) },
                         fontSize = 13.sp
                     )
-                    val uses = content.reactions.filter { it.inputs.contains(m.id) }
+                    fun label(id: String): String =
+                        if (state.discoveredReactions.contains(id))
+                            content.reactionById[id]?.name ?: id
+                        else "???"
+
+                    val madeBy = LinkEngine.madeBy(content, m.id)
+                    if (madeBy.isNotEmpty()) {
+                        Spacer(Modifier.height(8.dp))
+                        Text("つくり方", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        madeBy.forEach { r ->
+                            Text(
+                                "・" + label(r.id) + "（" +
+                                    r.inputs.joinToString("＋") { content.materialName(it) } + "）",
+                                fontSize = 13.sp
+                            )
+                        }
+                    }
+
+                    val uses = LinkEngine.usedIn(content, m.id)
                     if (uses.isNotEmpty()) {
-                        Spacer(Modifier.height(6.dp))
+                        Spacer(Modifier.height(8.dp))
+                        Text("使い道", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        uses.forEach { r ->
+                            Text(
+                                "・" + label(r.id) + " → " + content.materialName(r.product),
+                                fontSize = 13.sp
+                            )
+                        }
+                    }
+
+                    val needed = LinkEngine.neededBy(content, m.id)
+                    if (needed.isNotEmpty()) {
+                        Spacer(Modifier.height(8.dp))
                         Text(
-                            "この素材を使う実験：" + uses.joinToString("、") {
-                                if (state.discoveredReactions.contains(it.id)) it.name else "???"
-                            },
+                            "必要とする技術：" + needed.joinToString("、") { it.name },
                             fontSize = 13.sp
+                        )
+                    }
+
+                    val chain = LinkEngine.chainForward(content, m.id)
+                    if (chain.isNotEmpty()) {
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            "この先につながるもの：" +
+                                chain.joinToString("、") { content.materialName(it) },
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }

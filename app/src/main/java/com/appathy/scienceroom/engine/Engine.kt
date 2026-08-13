@@ -536,6 +536,30 @@ object TechnologyEngine {
     }
 }
 
+/** 出題する元素の範囲。30種になって全部から出すと散らばりすぎるため */
+enum class QuizScope(val id: String, val label: String) {
+    ALL("all", "すべて"),
+    BASIC("basic", "第1〜3周期"),
+    METAL("metal", "金属"),
+    NONMETAL("nonmetal", "非金属と気体"),
+    KNOWN("known", "覚えたものだけ");
+
+    fun matches(e: Element): Boolean = when (this) {
+        ALL -> true
+        BASIC -> e.period in 1..3
+        METAL -> metalCategories.contains(e.category)
+        NONMETAL -> !metalCategories.contains(e.category)
+        KNOWN -> true
+    }
+
+    companion object {
+        // 「非金属」も文字として金属を含むので、集合で判定する
+        private val metalCategories = setOf(
+            "アルカリ金属", "アルカリ土類金属", "遷移金属", "金属"
+        )
+    }
+}
+
 enum class QuizMode(val id: String, val label: String) {
     SYMBOL_TO_NAME("sym2name", "記号 → 名前"),
     NAME_TO_SYMBOL("name2sym", "名前 → 記号"),
@@ -568,7 +592,8 @@ object LearningEngine {
         mode: QuizMode?,
         now: Long,
         dueOnly: Boolean = false,
-        event: GameEvent? = null
+        event: GameEvent? = null,
+        scope: QuizScope = QuizScope.ALL
     ): Question {
         val focus = if (event != null && event.kind == GameEvent.Kind.STUDY) event.targetId else null
         val chosenMode = mode ?: QuizMode.entries.random()
@@ -576,7 +601,11 @@ object LearningEngine {
             val l = state.learning[e.id]
             l != null && l.nextReview in 1..now
         }
-        val pool = if (dueOnly && due.size >= 4) due else content.elements
+        val scoped = content.elements.filter { e ->
+            if (scope == QuizScope.KNOWN) state.knownElements.contains(e.id) else scope.matches(e)
+        }.ifEmpty { content.elements }
+        val pool = if (dueOnly && due.size >= 4) due.filter { scoped.contains(it) }
+            .ifEmpty { due } else scoped
         val target = pool.maxByOrNull { e ->
             val l = state.learning[e.id]
             val risk = l?.forgettingRisk(now) ?: 1.0
@@ -584,7 +613,10 @@ object LearningEngine {
             risk + bonus + Random.nextDouble() * 0.25
         } ?: pool.first()
 
-        val distractors = content.elements.filter { it.id != target.id }.shuffled().take(3)
+        // 選択肢は範囲内から作ると迷いどころが揃う
+        val distractorPool = scoped.filter { it.id != target.id }
+            .ifEmpty { content.elements.filter { it.id != target.id } }
+        val distractors = distractorPool.shuffled().take(3)
         return when (chosenMode) {
             QuizMode.SYMBOL_TO_NAME -> Question(
                 chosenMode, target, target.symbol, false,
@@ -782,6 +814,50 @@ object CivilizationEngine {
 }
 
 data class Suggestion(val title: String, val reason: String, val route: String)
+
+/** 素材や元素のつながりを引くための逆引き */
+object LinkEngine {
+
+    /** この素材をつくる反応 */
+    fun madeBy(content: Content, materialId: String): List<Reaction> =
+        content.reactions.filter { it.product == materialId }
+
+    /** この素材を使う反応 */
+    fun usedIn(content: Content, materialId: String): List<Reaction> =
+        content.reactions.filter { it.inputs.contains(materialId) }
+
+    /** この素材を必要とする技術 */
+    fun neededBy(content: Content, materialId: String): List<Technology> =
+        content.technologies.filter { it.requiredMaterials.contains(materialId) }
+
+    /** この元素を含む素材 */
+    fun materialsOf(content: Content, elementId: String): List<GameMaterial> =
+        content.materials.filter { it.elements.contains(elementId) }
+
+    /** この元素の知識を要求する技術 */
+    fun techOf(content: Content, elementId: String): List<Technology> =
+        content.technologies.filter { it.requiredElements.contains(elementId) }
+
+    /**
+     * この素材から先に作れるものを辿る。深さは3段まで。
+     * 「石灰石 → 生石灰 → 消石灰 → 漆喰」のような連なりを見せる
+     */
+    fun chainForward(content: Content, materialId: String, depth: Int = 3): List<String> {
+        val out = mutableListOf<String>()
+        var frontier = listOf(materialId)
+        val seen = mutableSetOf(materialId)
+        repeat(depth) {
+            val next = frontier.flatMap { id -> usedIn(content, id) }
+                .map { it.product }
+                .filter { seen.add(it) }
+                .distinct()
+            if (next.isEmpty()) return out.take(8)
+            out.addAll(next)
+            frontier = next
+        }
+        return out.take(8)
+    }
+}
 
 object RecommendEngine {
 

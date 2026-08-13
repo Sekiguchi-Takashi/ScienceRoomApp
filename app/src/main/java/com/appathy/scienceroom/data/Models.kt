@@ -203,6 +203,7 @@ data class PlayerState(
     val autoHint: Boolean = true,
     val researchLeads: Set<String> = emptySet(),
     val notebook: List<ExperimentLog> = emptyList(),
+    val favorites: List<ExperimentLog> = emptyList(),
     val daily: DailyProgress = DailyProgress(),
     val history: List<DailyStat> = emptyList(),
     val eventWeek: Long = -1,
