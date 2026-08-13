@@ -6,6 +6,7 @@ import com.appathy.scienceroom.data.ExperimentInput
 import com.appathy.scienceroom.data.ExperimentResult
 import com.appathy.scienceroom.data.FailureCause
 import com.appathy.scienceroom.data.GameLocation
+import com.appathy.scienceroom.data.GameMaterial
 import com.appathy.scienceroom.data.PlayerState
 import com.appathy.scienceroom.data.Rank
 import com.appathy.scienceroom.data.Reaction

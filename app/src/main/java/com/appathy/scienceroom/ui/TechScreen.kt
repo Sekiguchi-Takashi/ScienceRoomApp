@@ -43,6 +43,7 @@ fun TechScreen(game: Game, onNavigate: (String) -> Unit) {
     val state = game.state
     val statuses = TechnologyEngine.all(content, state)
     val tierMap = RoadmapEngine.tiers(content)
+    var filter by remember { mutableStateOf("all") }
     val filtered = when (filter) {
         "ready" -> statuses.filter { it.ready }
         "open" -> statuses.filter { !it.completed && it.unlocked }
@@ -54,7 +55,6 @@ fun TechScreen(game: Game, onNavigate: (String) -> Unit) {
     var completedName by remember { mutableStateOf<String?>(null) }
     var planFor by remember { mutableStateOf<String?>(null) }
     var planStyle by remember { mutableStateOf(PlanStyle.SHORTEST) }
-    var filter by remember { mutableStateOf("all") }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),

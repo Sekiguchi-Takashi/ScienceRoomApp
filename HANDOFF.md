@@ -64,6 +64,13 @@ Actions の artifact から debug APK をダウンロードする。Gradle Wrapp
 - 比を設定した反応は11件（ガラス・銅・スズ・青銅・製鉄・たたら・消石灰・漆喰・釉薬・鋼・灰汁）
 - 図鑑の反応タブに材料比を表示
 
+## v5.3（v5.2 のビルド修正）
+- `Engine.kt` に `GameMaterial` の import が抜けていた（`LinkEngine.materialsOf` の戻り値型）。
+  これが解決できず、呼び出し側の `EncyclopediaScreen` でも型推論が連鎖的に失敗していた
+- `TechScreen` で `filter` を使用より後ろで宣言していた
+- 以後の確認手順：data / engine の公開型名を総当たりして import 漏れを検査し、
+  `by remember` の宣言位置が使用より前にあるかも確認する
+
 ## v5.2 で入れたもの
 - `LinkEngine` … 素材と元素の逆引き。図鑑の素材詳細に「つくり方 / 使い道 / 必要とする技術 /
   この先につながるもの」を、元素詳細に「この元素を含む素材 / この知識が要る技術」を表示。
