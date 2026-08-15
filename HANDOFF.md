@@ -28,6 +28,14 @@
 - `TechnologyEngine` … 前提技術・素材・知識・反応の充足判定と解禁処理
 - `RecommendEngine` … 次の行動 TOP3 をルールで生成（原則2：判定はルール、AIは説明と推薦）
 
+## deploy.sh
+恒久仕様。push とタグ発行までを1コマンドで完結させる。
+`git pull --rebase origin main` は必須 —— カタログ管理システムが API 経由で
+`.github/workflows/release.yml` と `ci/appathy.keystore` を直接コミットするため、
+これが無いと push が rejected になる。この2ファイルと `ci/` は配布ビルドに必要なので削除しない
+（.gitignore に足すのも不可）。タグを打つと Actions がビルドして Release を作り、
+自作アプリストアに更新として現れる。
+
 ## 署名
 `keystore/debug.keystore` をリポジトリに含め、debug / release とも固定の鍵で署名する。
 これがないと GitHub Actions が実行ごとに違うデバッグ鍵を作るため、
