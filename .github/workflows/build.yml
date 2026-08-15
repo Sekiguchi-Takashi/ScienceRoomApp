@@ -25,13 +25,3 @@ jobs:
         if: failure()
         run: |
           grep -n "^e: " build.log | head -60 || true
-      - uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: build-log
-          path: build.log
-      - uses: actions/upload-artifact@v4
-        if: success()
-        with:
-          name: ScienceRoomApp-debug-apk
-          path: app/build/outputs/apk/debug/*.apk

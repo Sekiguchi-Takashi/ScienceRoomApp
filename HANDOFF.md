@@ -52,9 +52,13 @@
 Play ストアに出す場合は別途リリース鍵を用意すること。
 
 ## ビルド
-GitHub Actions（`.github/workflows/build.yml`）で `gradle assembleDebug`。
-Actions の artifact から debug APK をダウンロードする。Gradle Wrapper は同梱せず、
-`gradle/actions/setup-gradle` が Gradle 8.9 を用意する。
+`.github/workflows/build.yml` は毎 push のコンパイル確認用。`gradle assembleDebug` を走らせ、
+失敗したときは `e:` で始まる Kotlin のエラー行をログに抜き出すだけ。
+**`actions/upload-artifact` は入れない** —— Artifacts のストレージ無料枠（0.5GB）が枯渇して
+"Artifact storage quota has been hit" でビルドごと失敗するため。APK は Release から配布する。
+Gradle Wrapper は同梱せず、`gradle/actions/setup-gradle` が Gradle 8.9 を用意する。
+
+配布ビルドは deploy.sh のタグ発行で起動する `release.yml` が行う。
 
 ## MVP-2 で入れたもの（v2.0）
 - `SerendipityEngine` … 定義外の組み合わせから確率 35%（シードは実験回数＋素材の並び）で研究候補を開放。
