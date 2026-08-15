@@ -45,6 +45,7 @@ import com.appathy.scienceroom.engine.EventEngine
 import com.appathy.scienceroom.engine.GameEvent
 import com.appathy.scienceroom.engine.ExperimentEngine
 import com.appathy.scienceroom.engine.RatioEngine
+import com.appathy.scienceroom.engine.Scene
 
 /** 実験の入力条件。ノートから復元できるようタブをまたいで保持する */
 class LabInput {
@@ -335,6 +336,32 @@ private fun ExperimentPane(game: Game, input: LabInput) {
             title = { Text((if (success) "🎉 " else "🤔 ") + r.title + "　［" + r.rank + "］") },
             text = {
                 Column {
+                    val scene = when (r.rank) {
+                        Rank.S, Rank.A -> Scene.EXPERIMENT_SUCCESS
+                        Rank.B -> Scene.EXPERIMENT_PARTIAL
+                        else -> if (r.leadReactionId != null) Scene.DISCOVER_LEAD
+                        else Scene.EXPERIMENT_FAIL
+                    }
+                    val product = r.productId?.let { content.materialById[it] }
+                    if (product != null) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Burst(key = r) { Thumb(product.imageId, 92) }
+                        }
+                        Spacer(Modifier.height(8.dp))
+                    } else if (!success) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Shake(key = r) { Thumb("eq_crucible", 72) }
+                        }
+                        Spacer(Modifier.height(8.dp))
+                    }
+                    SceneSpeech(scene, game.state.experimentCount)
+                    Spacer(Modifier.height(8.dp))
                     Text("観察", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                     Text(r.observation, fontSize = 14.sp)
                     Spacer(Modifier.height(8.dp))

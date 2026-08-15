@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import com.appathy.scienceroom.Game
 import com.appathy.scienceroom.engine.GameEvent
 import com.appathy.scienceroom.engine.MissionEngine
+import com.appathy.scienceroom.engine.Scene
 import com.appathy.scienceroom.engine.PlanEngine
 import com.appathy.scienceroom.engine.PlanStyle
 import com.appathy.scienceroom.engine.ReviewEngine
@@ -194,6 +195,12 @@ fun HomeScreen(game: Game, onNavigate: (String) -> Unit) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+            }
+        }
+
+        item {
+            PanelCard {
+                SceneSpeech(Scene.HOME, state.exp / 10)
             }
         }
 

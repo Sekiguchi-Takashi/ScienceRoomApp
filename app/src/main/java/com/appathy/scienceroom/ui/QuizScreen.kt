@@ -41,6 +41,7 @@ import com.appathy.scienceroom.engine.LearningEngine
 import com.appathy.scienceroom.engine.Question
 import com.appathy.scienceroom.engine.QuizMode
 import com.appathy.scienceroom.engine.QuizScope
+import com.appathy.scienceroom.engine.Scene
 import com.appathy.scienceroom.engine.QuizSession
 import com.appathy.scienceroom.engine.ReviewEngine
 
@@ -219,8 +220,14 @@ fun QuizScreen(game: Game, onClose: () -> Unit) {
                         else MaterialTheme.colorScheme.error
                     )
                     Spacer(Modifier.height(6.dp))
+                    SceneSpeech(
+                        if (picked == question.answer) Scene.QUIZ_CORRECT else Scene.QUIZ_WRONG,
+                        game.state.quizCount,
+                        48
+                    )
+                    Spacer(Modifier.height(6.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Thumb(e.imageId, 64)
+                        Pop(key = question) { Thumb(e.imageId, 64) }
                         Spacer(Modifier.width(10.dp))
                         Column {
                             Text(e.symbol + "　" + e.name, fontWeight = FontWeight.Bold)

@@ -39,6 +39,7 @@ import com.appathy.scienceroom.engine.ExploreOutcome
 import com.appathy.scienceroom.engine.EventEngine
 import com.appathy.scienceroom.engine.ExplorationEngine
 import com.appathy.scienceroom.engine.GameEvent
+import com.appathy.scienceroom.engine.Scene
 
 @Composable
 fun WorldScreen(game: Game, onNavigate: (String) -> Unit) {
@@ -61,11 +62,13 @@ fun WorldScreen(game: Game, onNavigate: (String) -> Unit) {
             val unlocked = state.unlockedLocations.contains(loc.id)
             Card(shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth()) {
                 Box(modifier = Modifier.fillMaxWidth().height(130.dp)) {
-                    AssetImage(
-                        name = loc.imageId,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
+                    Sway {
+                        AssetImage(
+                            name = loc.imageId,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
                     if (!unlocked) {
                         Box(
                             modifier = Modifier.fillMaxSize().background(Color(0xCC1B1B1B)),
@@ -138,11 +141,16 @@ fun WorldScreen(game: Game, onNavigate: (String) -> Unit) {
             title = { Text(if (o.foundMaterialId != null) "探索結果" else "収穫なし") },
             text = {
                 Column {
+                    SceneSpeech(
+                        if (o.foundMaterialId != null) Scene.EXPLORE_FOUND else Scene.EXPLORE_MISS,
+                        game.state.exploreCount
+                    )
+                    Spacer(Modifier.height(8.dp))
                     Text(o.message, fontSize = 15.sp)
                     if (mat != null) {
                         Spacer(Modifier.height(10.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Thumb(mat.imageId, 56)
+                            Pop(key = o) { Thumb(mat.imageId, 72) }
                             Spacer(Modifier.width(10.dp))
                             Column {
                                 Text("${mat.name} ×${o.amount}", fontWeight = FontWeight.Bold)

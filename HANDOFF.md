@@ -28,6 +28,15 @@
 - `TechnologyEngine` … 前提技術・素材・知識・反応の充足判定と解禁処理
 - `RecommendEngine` … 次の行動 TOP3 をルールで生成（原則2：判定はルール、AIは説明と推薦）
 
+## 登場人物とアニメーション
+- `engine/Cast.kt` … 6人（篤史・真由美・梨花・慎吾・敏行・茜）。役割と口ぶりを持ち、
+  場面（`Scene`）ごとに話す人が決まる。セリフは seed で選ぶだけで AI には投げない
+- `ui/Anim.kt` … `Flicker`（火のゆらぎ）/ `Sway`（草木のそよぎ）/ `Pop`（発見）/
+  `Shake`（失敗）/ `Burst`（反応の膨らみ）/ `Hover`（人物の浮遊）。
+  すべて Compose の animation だけで、動画も追加ライブラリも使わない
+- `Float` は `kotlin.Float` と名前が衝突するので `Hover` にしてある
+- キャラ画像は `char_<id>.png`（512×512 透過）
+
 ## deploy.sh
 恒久仕様。push とタグ発行までを1コマンドで完結させる。
 `git pull --rebase origin main` は必須 —— カタログ管理システムが API 経由で

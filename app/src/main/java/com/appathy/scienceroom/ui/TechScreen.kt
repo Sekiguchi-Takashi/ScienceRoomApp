@@ -34,6 +34,7 @@ import com.appathy.scienceroom.Game
 import com.appathy.scienceroom.engine.PlanEngine
 import com.appathy.scienceroom.engine.PlanStyle
 import com.appathy.scienceroom.engine.RoadmapEngine
+import com.appathy.scienceroom.engine.Scene
 import com.appathy.scienceroom.engine.TechnologyEngine
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -101,7 +102,12 @@ fun TechScreen(game: Game, onNavigate: (String) -> Unit) {
         items(grouped[tier] ?: emptyList()) { st ->
             PanelCard {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Thumb(st.tech.imageId, 48)
+                    // 火や炉の技術は、完成しているとゆらいで見える
+                    val fiery = st.completed && st.tech.id in setOf(
+                        "fire", "kiln", "charcoal", "iron", "forging", "crucible"
+                    )
+                    if (fiery) Flicker { Thumb(st.tech.imageId, 48) }
+                    else Thumb(st.tech.imageId, 48)
                     Spacer(Modifier.width(12.dp))
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Row(
@@ -256,7 +262,23 @@ fun TechScreen(game: Game, onNavigate: (String) -> Unit) {
         AlertDialog(
             onDismissRequest = { completedName = null },
             title = { Text("技術を解禁した") },
-            text = { Text("「$name」が完成しました。新しい素材・地域・実験が使えるようになります") },
+            text = {
+                Column {
+                    val tech = content.technologies.firstOrNull { it.name == name }
+                    if (tech != null) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Burst(key = name) { Thumb(tech.imageId, 96) }
+                        }
+                        Spacer(Modifier.height(8.dp))
+                    }
+                    SceneSpeech(Scene.TECH_UNLOCK, state.completedTech.size)
+                    Spacer(Modifier.height(8.dp))
+                    Text("「" + name + "」が完成しました。新しい素材・地域・実験が使えるようになります")
+                }
+            },
             confirmButton = { TextButton(onClick = { completedName = null }) { Text("閉じる") } }
         )
     }

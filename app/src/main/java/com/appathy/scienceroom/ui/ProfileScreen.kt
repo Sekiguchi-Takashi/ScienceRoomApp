@@ -37,6 +37,7 @@ import androidx.compose.ui.text.AnnotatedString
 import com.appathy.scienceroom.Game
 import com.appathy.scienceroom.ReviewReminder
 import com.appathy.scienceroom.data.PlayerRepo
+import com.appathy.scienceroom.engine.Cast
 import com.appathy.scienceroom.engine.CivilizationEngine
 import com.appathy.scienceroom.engine.HintEngine
 import com.appathy.scienceroom.engine.LearningEngine
@@ -158,6 +159,16 @@ fun ProfileScreen(game: Game, onClose: () -> Unit) {
                         }
                     }
                 }
+            }
+        }
+
+        item { SectionTitle("なかま") }
+        item {
+            PanelCard {
+                val featured = Cast.featured(state)
+                SpeechRow(featured, featured.role + "。" + featured.trait, 72)
+                Spacer(Modifier.height(10.dp))
+                CastRow()
             }
         }
 
