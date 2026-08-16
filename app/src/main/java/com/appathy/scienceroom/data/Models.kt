@@ -205,6 +205,8 @@ data class PlayerState(
     val notebook: List<ExperimentLog> = emptyList(),
     val favorites: List<ExperimentLog> = emptyList(),
     val displayCase: List<String> = emptyList(),
+    val assistLevel: String = "guided",
+    val lessonStep: Int = 0,
     val daily: DailyProgress = DailyProgress(),
     val history: List<DailyStat> = emptyList(),
     val eventWeek: Long = -1,

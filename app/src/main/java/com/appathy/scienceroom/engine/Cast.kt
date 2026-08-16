@@ -47,7 +47,22 @@ object Cast {
         "計画の立案役", "次に何をすべきかを整理する。回り道も否定しない"
     )
 
-    val all = listOf(atsushi, mayumi, rika, shingo, toshiyuki, akane)
+    val rinko = Character(
+        "rinko", "凛子先生", "char_rinko",
+        "化学の先生", "何が起きているかを順序立てて説明する。急かさない"
+    )
+    val daichi = Character(
+        "daichi", "大地先生", "char_daichi",
+        "実験の先生", "手順を一段ずつ示す。まず作ってみよう、が口ぐせ"
+    )
+    val yuto = Character(
+        "yuto", "悠斗", "char_yuto",
+        "一学年上の先輩", "つまずいた場所を覚えている。近い目線で助言する"
+    )
+
+    val students = listOf(atsushi, mayumi, rika, shingo, toshiyuki, akane)
+    val teachers = listOf(daichi, rinko, yuto)
+    val all = students + teachers
 
     fun byId(id: String): Character = all.firstOrNull { it.id == id } ?: atsushi
 

@@ -1,5 +1,8 @@
 package com.appathy.scienceroom.ui
 
+import com.appathy.scienceroom.engine.Cast
+import com.appathy.scienceroom.engine.TeacherEngine
+import com.appathy.scienceroom.engine.Assist
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -107,6 +110,84 @@ private fun ExperimentPane(game: Game, input: LabInput) {
         contentPadding = PaddingValues(14.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        item {
+            val assist = Assist.entries.firstOrNull { it.id == state.assistLevel } ?: Assist.GUIDED
+            PanelCard {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("実験の進めかた", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                }
+                Spacer(Modifier.height(6.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Assist.entries.forEach { a ->
+                        FilterChip(
+                            selected = assist == a,
+                            onClick = { game.update { s2 -> s2.copy(assistLevel = a.id) } },
+                            label = { Text(a.label, fontSize = 10.sp) }
+                        )
+                    }
+                }
+                Text(
+                    assist.note,
+                    fontSize = 10.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                if (assist != Assist.SELF) {
+                    val target = TeacherEngine.nextLesson(content, state)
+                    if (target != null) {
+                        Spacer(Modifier.height(10.dp))
+                        val step = state.lessonStep.coerceIn(0, 3)
+                        val lesson = TeacherEngine.lesson(content, target, step)
+                        Text(
+                            "第" + (step + 1) + "歩　" + lesson.title,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        SpeechRow(lesson.speaker, lesson.body, 56)
+                        Spacer(Modifier.height(6.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            if (step > 0) {
+                                TextButton(onClick = {
+                                    game.update { s2 -> s2.copy(lessonStep = step - 1) }
+                                }) { Text("前へ") }
+                            }
+                            if (!lesson.isLast) {
+                                Button(onClick = {
+                                    game.feedback(Feedback.Kind.TAP)
+                                    game.update { s2 -> s2.copy(lessonStep = step + 1) }
+                                }) { Text("次を教わる") }
+                            } else {
+                                Button(onClick = {
+                                    input.selected = target.inputs
+                                    input.quantities = target.inputs.associateWith { id ->
+                                        target.ratios?.get(id) ?: 1
+                                    }
+                                    input.temperature =
+                                        ((target.minTemp + target.maxTemp) / 2).toFloat()
+                                    input.duration = (target.minDuration + 1)
+                                        .coerceAtMost(8).toFloat()
+                                    input.equipment = target.equipment ?: Equipment.NONE
+                                    game.feedback(Feedback.Kind.DISCOVER)
+                                }) { Text("この条件を用意する") }
+                            }
+                            TextButton(onClick = {
+                                game.update { s2 -> s2.copy(lessonStep = 0) }
+                            }) { Text("最初から") }
+                        }
+                    } else {
+                        Spacer(Modifier.height(8.dp))
+                        Text("いま教えられることはもうないよ。よくここまで来たね", fontSize = 13.sp)
+                    }
+                }
+            }
+        }
+
         item { SectionTitle("素材を選ぶ（持っているもの）") }
 
         if (owned.isEmpty()) {
@@ -213,6 +294,14 @@ private fun ExperimentPane(game: Game, input: LabInput) {
                     fontSize = 11.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                val assistNow = Assist.entries.firstOrNull { it.id == state.assistLevel }
+                    ?: Assist.GUIDED
+                val advice = TeacherEngine.temperatureAdvice(
+                    content, assistNow, input.selected, input.temperature.toInt()
+                )
+                if (advice.isNotEmpty()) {
+                    Text(advice, fontSize = 11.sp, color = MaterialTheme.colorScheme.primary)
+                }
                 Spacer(Modifier.height(10.dp))
                 Text(
                     "時間：" + input.duration.toInt(),
@@ -262,7 +351,10 @@ private fun ExperimentPane(game: Game, input: LabInput) {
                         if (r.rank == Rank.S || r.rank == Rank.A) Feedback.Kind.SUCCESS
                         else Feedback.Kind.FAIL
                     )
-                    if (r.rank == Rank.S || r.rank == Rank.A) input.clear()
+                    if (r.rank == Rank.S || r.rank == Rank.A) {
+                        input.clear()
+                        game.update { s2 -> s2.copy(lessonStep = 0) }
+                    }
                 },
                 enabled = input.selected.isNotEmpty(),
                 modifier = Modifier.fillMaxWidth()
@@ -380,6 +472,13 @@ private fun ExperimentPane(game: Game, input: LabInput) {
                         Text("主な原因候補", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                         r.causes.forEachIndexed { i, c ->
                             Text((i + 1).toString() + ". " + c.label + "：" + c.weight, fontSize = 13.sp)
+                        }
+                    }
+                    if (r.causes.isNotEmpty()) {
+                        val tip = TeacherEngine.advice(r.causes)
+                        if (tip.isNotEmpty()) {
+                            Spacer(Modifier.height(8.dp))
+                            SpeechRow(Cast.daichi, tip, 48)
                         }
                     }
                     if (r.hint.isNotEmpty()) {

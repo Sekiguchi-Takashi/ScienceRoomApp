@@ -180,12 +180,15 @@ fun SceneSpeech(scene: Scene, seed: Int, size: Int = 64, modifier: Modifier = Mo
 
 /** 人物の並び。図鑑などで一覧に使う */
 @Composable
-fun CastRow(modifier: Modifier = Modifier) {
+fun CastRow(
+    members: List<Character> = Cast.all,
+    modifier: Modifier = Modifier
+) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        Cast.all.forEach { c ->
+        members.forEach { c ->
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Thumb(c.imageId, 44)
                 Text(c.name, fontSize = 9.sp, modifier = Modifier.padding(top = 2.dp))

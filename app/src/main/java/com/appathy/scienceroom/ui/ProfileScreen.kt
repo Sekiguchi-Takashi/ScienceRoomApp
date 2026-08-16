@@ -168,7 +168,13 @@ fun ProfileScreen(game: Game, onClose: () -> Unit) {
                 val featured = Cast.featured(state)
                 SpeechRow(featured, featured.role + "。" + featured.trait, 72)
                 Spacer(Modifier.height(10.dp))
-                CastRow()
+                Text("同級生", fontSize = 11.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                CastRow(Cast.students)
+                Spacer(Modifier.height(8.dp))
+                Text("教えてくれる人", fontSize = 11.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                CastRow(Cast.teachers)
             }
         }
 
