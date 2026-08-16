@@ -874,13 +874,6 @@ object RecommendEngine {
         val nextTech = statuses.firstOrNull { !it.completed && it.unlocked }
         if (nextTech != null && out.size < 3) {
             when {
-                nextTech.missingElements.isNotEmpty() -> out.add(
-                    Suggestion(
-                        "${content.elementName(nextTech.missingElements.first())}を覚える",
-                        "「${nextTech.tech.name}」に必要な知識が足りていない",
-                        "quiz"
-                    )
-                )
                 nextTech.missingMaterials.isNotEmpty() -> {
                     val need = nextTech.missingMaterials.first()
                     val where = content.locations.firstOrNull {
@@ -905,13 +898,6 @@ object RecommendEngine {
                         )
                     )
                 }
-            }
-        }
-
-        if (out.size < 3) {
-            val weak = LearningEngine.weakElements(content, state, now, 1).firstOrNull()
-            if (weak != null) {
-                out.add(Suggestion("${weak.name}（${weak.symbol}）を復習する", "いま最も忘れやすい元素", "quiz"))
             }
         }
 

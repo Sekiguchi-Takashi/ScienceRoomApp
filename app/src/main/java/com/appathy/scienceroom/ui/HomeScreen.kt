@@ -27,7 +27,6 @@ import com.appathy.scienceroom.engine.MissionEngine
 import com.appathy.scienceroom.engine.Scene
 import com.appathy.scienceroom.engine.PlanEngine
 import com.appathy.scienceroom.engine.PlanStyle
-import com.appathy.scienceroom.engine.ReviewEngine
 import com.appathy.scienceroom.engine.RecommendEngine
 
 @Composable
@@ -42,7 +41,6 @@ fun HomeScreen(game: Game, onNavigate: (String) -> Unit) {
     val goalTech = goalId?.let { content.techById[it] }
     val goalSteps = if (goalId == null) emptyList()
     else PlanEngine.plan(content, state, goalId, PlanStyle.SHORTEST).take(3)
-    val dueCount = ReviewEngine.dueCount(content, state, now)
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -178,23 +176,6 @@ fun HomeScreen(game: Game, onNavigate: (String) -> Unit) {
                     color = if (state.eventClaimed) MaterialTheme.colorScheme.primary
                     else MaterialTheme.colorScheme.onSurface
                 )
-            }
-        }
-
-        if (dueCount > 0) {
-            item {
-                PanelCard(modifier = Modifier.clickable { onNavigate("quiz") }) {
-                    Text(
-                        "復習どきの元素が " + dueCount + " 個",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        "忘れかけたころに解き直すと、いちばん記憶に残ります",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
             }
         }
 

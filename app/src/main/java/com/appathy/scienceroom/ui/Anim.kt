@@ -61,22 +61,6 @@ fun Flicker(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Box(modifier = modifier.scale(scale).rotate(tilt)) { content() }
 }
 
-/** 草木のそよぎ。倒れるほどではない、ゆっくりした傾き */
-@Composable
-fun Sway(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    val transition = rememberInfiniteTransition(label = "sway")
-    val tilt by transition.animateFloat(
-        initialValue = -2.5f,
-        targetValue = 2.5f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2600, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "swayTilt"
-    )
-    Box(modifier = modifier.rotate(tilt)) { content() }
-}
-
 /** 発見や完成のときに、ぽんと現れて落ち着く */
 @Composable
 fun Pop(key: Any?, modifier: Modifier = Modifier, content: @Composable () -> Unit) {

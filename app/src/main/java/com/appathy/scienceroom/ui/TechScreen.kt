@@ -171,9 +171,7 @@ fun TechScreen(game: Game, onNavigate: (String) -> Unit) {
                             enabled = st.ready
                         ) { Text("研究する") }
                         TextButton(onClick = { planFor = st.tech.id }) { Text("研究計画") }
-                        if (st.missingElements.isNotEmpty()) {
-                            TextButton(onClick = { onNavigate("quiz") }) { Text("元素を覚える") }
-                        } else if (st.missingMaterials.isNotEmpty()) {
+                        if (st.missingMaterials.isNotEmpty()) {
                             TextButton(onClick = { onNavigate("world") }) { Text("探索") }
                         } else if (st.missingReactions.isNotEmpty()) {
                             TextButton(onClick = { onNavigate("lab") }) { Text("実験") }

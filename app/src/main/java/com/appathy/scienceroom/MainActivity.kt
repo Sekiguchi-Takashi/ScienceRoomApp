@@ -121,7 +121,8 @@ private val tabs = listOf(
     TabDef("world", "🗺", "世界"),
     TabDef("lab", "🧪", "実験"),
     TabDef("tech", "🔬", "技術"),
-    TabDef("book", "📖", "図鑑")
+    TabDef("book", "📖", "図鑑"),
+    TabDef("quiz", "✏️", "クイズ")
 )
 
 @Composable
@@ -142,7 +143,7 @@ fun AppRoot() {
     }
 
     val navigate: (String) -> Unit = { target ->
-        if (target == "quiz" || target == "profile") overlay = target
+        if (target == "profile") overlay = target
         else {
             overlay = null
             route = target
@@ -152,7 +153,6 @@ fun AppRoot() {
     if (overlay != null) {
         Box(modifier = Modifier.fillMaxSize()) {
             when (overlay) {
-                "quiz" -> QuizScreen(game) { overlay = null }
                 "profile" -> ProfileScreen(game) { overlay = null }
             }
         }
@@ -180,6 +180,7 @@ fun AppRoot() {
                 "lab" -> LabScreen(game, navigate)
                 "tech" -> TechScreen(game, navigate)
                 "book" -> EncyclopediaScreen(game, navigate)
+                "quiz" -> QuizScreen(game) { route = "home" }
             }
         }
     }

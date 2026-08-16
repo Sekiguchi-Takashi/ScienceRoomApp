@@ -62,13 +62,11 @@ fun WorldScreen(game: Game, onNavigate: (String) -> Unit) {
             val unlocked = state.unlockedLocations.contains(loc.id)
             Card(shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth()) {
                 Box(modifier = Modifier.fillMaxWidth().height(130.dp)) {
-                    Sway {
-                        AssetImage(
-                            name = loc.imageId,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
+                    AssetImage(
+                        name = loc.imageId,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
                     if (!unlocked) {
                         Box(
                             modifier = Modifier.fillMaxSize().background(Color(0xCC1B1B1B)),
@@ -136,6 +134,17 @@ fun WorldScreen(game: Game, onNavigate: (String) -> Unit) {
     val o = outcome
     if (o != null) {
         val mat = o.foundMaterialId?.let { content.materialById[it] }
+        if (mat != null && mat.rarity >= 4) {
+            AlertDialog(
+                onDismissRequest = { },
+                title = { Text("宝箱を見つけた") },
+                text = {
+                    TreasureReveal(material = mat, amount = o.amount) { outcome = null }
+                },
+                confirmButton = { }
+            )
+            return
+        }
         AlertDialog(
             onDismissRequest = { outcome = null },
             title = { Text(if (o.foundMaterialId != null) "探索結果" else "収穫なし") },

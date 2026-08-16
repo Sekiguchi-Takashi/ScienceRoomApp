@@ -57,6 +57,12 @@ fun EncyclopediaScreen(game: Game, onNavigate: (String) -> Unit) {
             Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text("素材") })
             Tab(selected = tab == 2, onClick = { tab = 2 }, text = { Text("化合物") })
             Tab(selected = tab == 3, onClick = { tab = 3 }, text = { Text("反応") })
+            Tab(selected = tab == 4, onClick = { tab = 4 }, text = { Text("かざる") })
+        }
+
+        if (tab == 4) {
+            CollectionPane(game)
+            return@Column
         }
 
         LazyColumn(
@@ -76,7 +82,6 @@ fun EncyclopediaScreen(game: Game, onNavigate: (String) -> Unit) {
                                 "覚えた元素 ${state.knownElements.size} / ${content.elements.size}",
                                 fontSize = 14.sp
                             )
-                            Button(onClick = { onNavigate("quiz") }) { Text("クイズを解く") }
                         }
                         Spacer(Modifier.height(6.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
