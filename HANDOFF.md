@@ -63,28 +63,32 @@
 - `Float` は `kotlin.Float` と名前が衝突するので `Hover` にしてある
 - キャラ画像は `char_<id>.png`（512×512 透過）
 
-## deploy.sh
-恒久仕様。push とタグ発行までを1コマンドで完結させる。
-`git pull --rebase origin main` は必須 —— カタログ管理システムが API 経由で
-`.github/workflows/release.yml` と `ci/appathy.keystore` を直接コミットするため、
-これが無いと push が rejected になる。この2ファイルと `ci/` は配布ビルドに必要なので削除しない
-（.gitignore に足すのも不可）。タグを打つと Actions がビルドして Release を作り、
-自作アプリストアに更新として現れる。
+## deploy.sh（恒久仕様）
+`push → pull --rebase → タグ発行` まで1コマンドで完結する。
+
+- 次タグは `git tag --list 'v*' | sort -V` の最大値から算出し、`git tag` / `git push origin <タグ>` で
+  ローカル発行する。GitHub API の heads 参照は反映が遅れて一つ前のコミットに付くため使わない
+- 第2引数に `notag` を渡すと push のみでタグを打たない
+- `git pull --rebase origin main` は必須 —— カタログ管理システムが API 経由で
+  `.github/workflows/release.yml` と `ci/appathy.keystore` を直接コミットするため、
+  無いと push が rejected になる
+- `ci/` と `release.yml` は配布ビルドに必要。削除も追跡解除もしない（.gitignore に足すのも不可）
+- ファイルを削除する納品では deploy.sh に `rm -f <対象パス>` を足す。
+  端末側は `unzip -o` で上書きするだけなので、旧ファイルが残るため
+- シェルは `echo` を使わない（`printf` を使う）。対話入力もしない。トークンは
+  `git config --global github.token` から読むだけで、チャットに貼らせない
+
+## CI
+`build.yml` は作らない。CI はタグ起動の `release.yml` のみ。
+`actions/upload-artifact` は使わない —— Artifacts のストレージ無料枠（0.5GB）が枯渇して
+"Artifact storage quota has been hit" でビルドごと失敗するため。APK は Release から配布する。
+Gradle Wrapper は同梱しない。
 
 ## 署名
 `keystore/debug.keystore` をリポジトリに含め、debug / release とも固定の鍵で署名する。
 これがないと GitHub Actions が実行ごとに違うデバッグ鍵を作るため、
 新しい APK を入れるたびに「先にアンインストール」が必要になる。この鍵はデバッグ用で、
 Play ストアに出す場合は別途リリース鍵を用意すること。
-
-## ビルド
-`.github/workflows/build.yml` は毎 push のコンパイル確認用。`gradle assembleDebug` を走らせ、
-失敗したときは `e:` で始まる Kotlin のエラー行をログに抜き出すだけ。
-**`actions/upload-artifact` は入れない** —— Artifacts のストレージ無料枠（0.5GB）が枯渇して
-"Artifact storage quota has been hit" でビルドごと失敗するため。APK は Release から配布する。
-Gradle Wrapper は同梱せず、`gradle/actions/setup-gradle` が Gradle 8.9 を用意する。
-
-配布ビルドは deploy.sh のタグ発行で起動する `release.yml` が行う。
 
 ## MVP-2 で入れたもの（v2.0）
 - `SerendipityEngine` … 定義外の組み合わせから確率 35%（シードは実験回数＋素材の並び）で研究候補を開放。
